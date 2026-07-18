@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Report | Gluco Track</title>
+</head>
+
+<body>
+
+    <h1>🩺 Gluco Track</h1>
+    <h2>Diabetes Prediction Report</h2>
+
+    <hr>
+
+    <h3>Prediction Result</h3>
+
+    <p><strong>Prediction:</strong> {{ prediction }}</p>
+
+    <p><strong>Confidence:</strong> {{ confidence }}%</p>
+
+    <p><strong>Risk Level:</strong> {{ risk_level }}</p>
+
+    <hr>
+
+    <h3>⚠ Key Risk Factors</h3>
+
+    <ul>
+        {% for factor in risk_factors %}
+            <li>{{ factor }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h3>🥗 Food Recommendations</h3>
+
+    <ul>
+        {% for food in food_recommendations %}
+            <li>{{ food }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h3>🏃 Lifestyle Recommendations</h3>
+
+    <ul>
+        {% for tip in lifestyle_recommendations %}
+            <li>{{ tip }}</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <button>💾 Save Prediction</button>
+
+    <button>📄 Download PDF</button>
+
+    <br><br>
+
+    <a href="/dashboard">⬅ Back to Dashboard</a>
+
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Gluco Track</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-success">
+
+<div class="container-fluid">
+
+<a class="navbar-brand" href="/dashboard">
+
+🩺 Gluco Track
+
+</a>
+
+<div>
+
+<a href="/dashboard" class="btn btn-light btn-sm">Dashboard</a>
+
+<a href="/profile" class="btn btn-light btn-sm">Profile</a>
+
+<a href="/predict" class="btn btn-light btn-sm">Predict</a>
+
+<a href="/history" class="btn btn-light btn-sm">History</a>
+
+<a href="/analytics" class="btn btn-light btn-sm">Analytics</a>
+
+<a href="/reports" class="btn btn-light btn-sm">Reports</a>
+
+<a href="/change_password" class="btn btn-light btn-sm">Password</a>
+
+<a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+
+</div>
+
+</div>
+
+</nav>
+
+<div class="container mt-4">
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+</body>
+
+</html>
