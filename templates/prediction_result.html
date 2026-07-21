@@ -5,63 +5,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prediction Report | Gluco Track</title>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            background:#f4f6f9;
+            margin:40px;
+        }
+
+        .container{
+            max-width:900px;
+            margin:auto;
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0px 0px 12px rgba(0,0,0,.15);
+        }
+
+        h1,h2{
+            text-align:center;
+            color:#0b6e4f;
+        }
+
+        hr{
+            margin:25px 0;
+        }
+
+        .info-box{
+            background:#f8f9fa;
+            padding:15px;
+            border-radius:8px;
+            margin-bottom:20px;
+        }
+
+        .info-box p{
+            font-size:18px;
+            margin:10px 0;
+        }
+
+        ul{
+            line-height:1.8;
+        }
+
+        .btn{
+            display:inline-block;
+            padding:12px 20px;
+            background:#0b6e4f;
+            color:white;
+            text-decoration:none;
+            border-radius:6px;
+            margin-top:15px;
+            margin-right:10px;
+        }
+
+    </style>
+
 </head>
 
 <body>
 
-    <h1>🩺 Gluco Track</h1>
-    <h2>Diabetes Prediction Report</h2>
+<div class="container">
 
-    <hr>
+<h1>🩺 Gluco Track</h1>
+<h2>Diabetes Prediction Report</h2>
 
-    <h3>Prediction Result</h3>
+<hr>
 
-    <p><strong>Prediction:</strong> {{ prediction }}</p>
+<h3>Prediction Summary</h3>
 
-    <p><strong>Confidence:</strong> {{ confidence }}%</p>
+<div class="info-box">
 
-    <p><strong>Risk Level:</strong> {{ risk_level }}</p>
+<p><strong>Prediction:</strong> {{ prediction }}</p>
 
-    <hr>
+<p><strong>Model Confidence:</strong> {{ confidence }}%</p>
 
-    <h3>⚠ Key Risk Factors</h3>
+<p><strong>Health Risk Score:</strong> {{ risk_score }}/9</p>
 
-    <ul>
-        {% for factor in risk_factors %}
-            <li>{{ factor }}</li>
-        {% endfor %}
-    </ul>
+<p><strong>Health Risk Level:</strong> {{ risk_level }}</p>
 
-    <hr>
+</div>
 
-    <h3>🥗 Food Recommendations</h3>
+<hr>
 
-    <ul>
-        {% for food in food_recommendations %}
-            <li>{{ food }}</li>
-        {% endfor %}
-    </ul>
+<h3>⚠ Key Risk Factors</h3>
 
-    <hr>
+<ul>
+{% for factor in risk_factors %}
+<li>{{ factor }}</li>
+{% endfor %}
+</ul>
 
-    <h3>🏃 Lifestyle Recommendations</h3>
+<hr>
 
-    <ul>
-        {% for tip in lifestyle_recommendations %}
-            <li>{{ tip }}</li>
-        {% endfor %}
-    </ul>
+<h3>🥗 Food Recommendations</h3>
 
-    <hr>
+<ul>
+{% for food in food_recommendations %}
+<li>{{ food }}</li>
+{% endfor %}
+</ul>
 
-    <button>💾 Save Prediction</button>
+<hr>
 
-    <button>📄 Download PDF</button>
+<h3>🏃 Lifestyle Recommendations</h3>
 
-    <br><br>
+<ul>
+{% for tip in lifestyle_recommendations %}
+<li>{{ tip }}</li>
+{% endfor %}
+</ul>
 
-    <a href="/dashboard">⬅ Back to Dashboard</a>
+<hr>
+
+<a href="#" class="btn">💾 Save Prediction</a>
+
+<a href="#" class="btn">📄 Download PDF</a>
+
+<a href="/dashboard" class="btn">⬅ Back to Dashboard</a>
+
+</div>
 
 </body>
-
 </html>

@@ -41,5 +41,10 @@ class Prediction(db.Model):
 
     prediction = db.Column(db.String(20))
     confidence = db.Column(db.Float)
+    risk_score = db.Column(db.Integer)
+    risk_level = db.Column(db.String(50))
+    risk_factors = db.Column(db.Text)
+    food_recommendations = db.Column(db.Text)
+    lifestyle_recommendations = db.Column(db.Text)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

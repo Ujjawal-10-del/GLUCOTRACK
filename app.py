@@ -3,6 +3,7 @@ import pandas as pd
 
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
+
 from flask_login import (
     LoginManager,
     login_user,
@@ -11,20 +12,9 @@ from flask_login import (
     current_user
 )
 
-from models import db, User
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import (
-    LoginManager,
-    login_user,
-    logout_user,
-    login_required,
-    current_user
-)
-
-from models import db, User
+from models import db, User, Prediction
 
 app = Flask(__name__)
-
 # ==========================
 # Configuration
 # ==========================
@@ -145,7 +135,7 @@ def logout():
     return redirect(url_for("login"))
 
 # ==========================
-# Predict Diabetes
+#Predict Diabetes
 # ==========================
 @app.route("/predict", methods=["GET", "POST"])
 @login_required
@@ -204,21 +194,50 @@ def predict():
         if prediction == 1:
             result = "Diabetic"
         else:
-            result = "Non-Diabetic"
+            result = "Non-Diabetic" 
+         
+        # --------------------------
+        # Health Risk Score
+        # --------------------------
+        risk_score = 0
+
+        # Glucose
+        if data["Glucose"] >= 140:
+            risk_score += 3
+
+        # BMI
+        if data["BMI"] >= 30:
+            risk_score += 2
+
+        # Blood Pressure
+        if data["BloodPressure"] >= 90:
+            risk_score += 1
+
+        # Age
+        if data["Age"] >= 45:
+            risk_score += 1
+
+        # Family History
+        if data["DiabetesPedigreeFunction"] >= 0.5:
+            risk_score += 2
+
 
         # --------------------------
-        # Risk Level
+        # Health Risk Level
         # --------------------------
-        if confidence >= 90:
-            risk_level = "Very High Risk"
-        elif confidence >= 80:
-            risk_level = "High Risk"
-        elif confidence >= 65:
-            risk_level = "Moderate Risk"
+        if risk_score <= 2:
+            risk_level = "🟢 Very Low Risk"
+        elif risk_score <= 4:
+            risk_level = "🟡 Low Risk"
+        elif risk_score <= 6:
+            risk_level = "🟠 Moderate Risk"
+        elif risk_score <= 8:
+            risk_level = "🔴 High Risk"
         else:
-            risk_level = "Low Risk"
-
-        # --------------------------
+            risk_level = "🚨 Very High Risk"
+        print("Risk Score =", risk_score)
+        print("Risk Level =", risk_level)
+                # --------------------------
         # Key Risk Factors
         # --------------------------
         risk_factors = []
@@ -275,7 +294,31 @@ def predict():
             lifestyle_recommendations.append(
                 "Consult a healthcare professional for further evaluation."
             )
+        # --------------------------
+        # Save Prediction to Database
+        # --------------------------
+        new_prediction = Prediction(
+             user_id=current_user.id,
 
+            pregnancies=data["Pregnancies"],
+            glucose=data["Glucose"],
+            blood_pressure=data["BloodPressure"],
+            skin_thickness=data["SkinThickness"],
+            insulin=data["Insulin"],
+            bmi=data["BMI"],
+            dpf=data["DiabetesPedigreeFunction"],
+            age=data["Age"],
+            prediction=result,
+            confidence=confidence,
+            risk_score=risk_score,
+            risk_level=risk_level,
+            risk_factors="\n".join(risk_factors),
+            food_recommendations="\n".join(food_recommendations),
+            lifestyle_recommendations="\n".join(lifestyle_recommendations)
+        )
+
+        db.session.add(new_prediction)
+        db.session.commit()
         # --------------------------
         # Show Prediction Report
         # --------------------------
@@ -283,13 +326,33 @@ def predict():
             "prediction_result.html",
             prediction=result,
             confidence=confidence,
+             risk_score=risk_score,
             risk_level=risk_level,
             risk_factors=risk_factors,
             food_recommendations=food_recommendations,
-            lifestyle_recommendations=lifestyle_recommendations
+            lifestyle_recommendations=lifestyle_recommendations,
+            
         )
 
     return render_template("predict.html")
+
+# ==========================
+# Prediction History page route
+# ==========================
+@app.route("/history")
+@login_required
+def history():
+
+    predictions = Prediction.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        Prediction.created_at.desc()
+    ).all()
+
+    return render_template(
+        "history.html",
+        predictions=predictions
+    )
 # ==========================
 # Create Database Tables
 # ==========================
