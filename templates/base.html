@@ -1,43 +1,325 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
-    <title>Gluco Track</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Gluco Track</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+background:#f5f7fb;
+
+min-height:100vh;
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+/* ===========================
+Navbar
+=========================== */
+
+.navbar{
+
+background:linear-gradient(135deg,#0d6e63,#198754);
+
+box-shadow:0 8px 25px rgba(0,0,0,.12);
+
+padding:14px 30px;
+
+}
+
+.navbar-brand{
+
+font-size:24px;
+
+font-weight:700;
+
+color:white !important;
+
+letter-spacing:.5px;
+
+}
+
+.nav-link-custom{
+
+color:white !important;
+
+margin-left:10px;
+
+padding:10px 18px;
+
+border-radius:10px;
+
+font-weight:500;
+
+transition:.35s;
+
+text-decoration:none;
+
+}
+
+.nav-link-custom:hover{
+
+background:rgba(255,255,255,.18);
+
+transform:translateY(-2px);
+
+}
+
+.logout-btn{
+
+background:#dc3545;
+
+color:white !important;
+
+border-radius:10px;
+
+padding:10px 18px;
+
+transition:.35s;
+
+text-decoration:none;
+
+}
+
+.logout-btn:hover{
+
+background:#bb2d3b;
+
+transform:translateY(-2px);
+
+}
+
+/* ===========================
+Cards
+=========================== */
+
+.card{
+
+border:none;
+
+border-radius:18px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+transition:.3s;
+
+}
+
+.card:hover{
+
+transform:translateY(-5px);
+
+box-shadow:0 18px 35px rgba(0,0,0,.12);
+
+}
+
+/* ===========================
+Buttons
+=========================== */
+
+.btn-success{
+
+border-radius:10px;
+
+padding:10px 22px;
+
+font-weight:600;
+
+}
+
+.btn-primary{
+
+border-radius:10px;
+
+padding:10px 22px;
+
+font-weight:600;
+
+}
+
+.btn-danger{
+
+border-radius:10px;
+
+padding:10px 22px;
+
+font-weight:600;
+
+}
+
+.container{
+
+margin-top:35px;
+
+margin-bottom:40px;
+
+flex:1;
+
+}
+
+/* ===========================
+Footer
+=========================== */
+
+footer{
+
+background:rgb(243, 239, 239);
+
+text-align:center;
+
+padding:20px;
+
+margin-top:auto;
+
+box-shadow:0 -5px 15px rgba(0,0,0,.05);
+
+color:#666;
+
+font-size:14px;
+
+}
+
+/* ===========================
+Responsive
+=========================== */
+
+@media(max-width:991px){
+
+.navbar-nav{
+
+margin-top:15px;
+
+}
+
+.nav-link-custom{
+
+display:block;
+
+margin:8px 0;
+
+}
+
+}
+
+</style>
 
 </head>
 
 <body>
+<!-- ==========================
+Navigation Bar
+========================== -->
 
-<nav class="navbar navbar-dark bg-success">
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
 
 <div class="container-fluid">
 
 <a class="navbar-brand" href="/dashboard">
-
-🩺 Gluco Track
-
+<i class="bi bi-heart-pulse-fill"></i>
+Gluco Track
 </a>
 
-<div>
+<button
+class="navbar-toggler"
+type="button"
+data-bs-toggle="collapse"
+data-bs-target="#navbarNav">
 
-<a href="/dashboard" class="btn btn-light btn-sm">Dashboard</a>
+<span class="navbar-toggler-icon"></span>
 
-<a href="/profile" class="btn btn-light btn-sm">Profile</a>
+</button>
 
-<a href="/predict" class="btn btn-light btn-sm">Predict</a>
+<div class="collapse navbar-collapse" id="navbarNav">
 
-<a href="/history" class="btn btn-light btn-sm">History</a>
+<ul class="navbar-nav ms-auto align-items-center">
 
-<a href="/analytics" class="btn btn-light btn-sm">Analytics</a>
+<li class="nav-item">
+<a class="nav-link-custom" href="/dashboard">
+<i class="bi bi-speedometer2"></i>
+Dashboard
+</a>
+</li>
 
-<a href="/reports" class="btn btn-light btn-sm">Reports</a>
+<li class="nav-item">
+<a class="nav-link-custom" href="/profile">
+<i class="bi bi-person-circle"></i>
+Profile
+</a>
+</li>
 
-<a href="/change_password" class="btn btn-light btn-sm">Password</a>
+<li class="nav-item">
+<a class="nav-link-custom" href="/predict">
+<i class="bi bi-capsule-pill"></i>
+Predict
+</a>
+</li>
 
-<a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+<li class="nav-item">
+<a class="nav-link-custom" href="/history">
+<i class="bi bi-clock-history"></i>
+History
+</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link-custom" href="/insights">
+<i class="bi bi-bar-chart-fill"></i>
+Analytics
+</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link-custom" href="/report">
+<i class="bi bi-file-earmark-pdf-fill"></i>
+Report
+</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link-custom" href="/change-password">
+<i class="bi bi-shield-lock-fill"></i>
+Password
+</a>
+</li>
+
+<li class="nav-item ms-2">
+<a class="logout-btn" href="/logout">
+<i class="bi bi-box-arrow-right"></i>
+Logout
+</a>
+</li>
+
+</ul>
 
 </div>
 
@@ -45,13 +327,65 @@
 
 </nav>
 
-<div class="container mt-4">
+<!-- ==========================
+Main Container
+========================== -->
+
+<div class="container">
 
 {% block content %}
 
 {% endblock %}
 
 </div>
+<!-- ==========================
+Footer
+========================== -->
+
+<footer>
+
+<div class="container">
+
+<div class="row align-items-center">
+
+<div class="col-md-6 text-md-start text-center">
+
+<h6 class="mb-1 text-success fw-bold">
+<i class="bi bi-heart-pulse-fill"></i>
+Gluco Track
+</h6>
+
+<p class="mb-0 text-muted">
+AI-Based Diabetes Prediction & Health Monitoring System
+</p>
+
+</div>
+
+<div class="col-md-6 text-md-end text-center mt-3 mt-md-0">
+
+<p class="mb-0 text-muted">
+
+© 2026 Gluco Track • All Rights Reserved
+
+</p>
+
+<small class="text-secondary">
+
+Developed using Flask • Bootstrap • Machine Learning
+
+</small>
+
+</div>
+
+</div>
+
+</div>
+
+</footer>
+
+<!-- Bootstrap JS -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 
