@@ -11,6 +11,10 @@ from flask_login import (
     login_required,
     current_user
 )
+from flask import make_response
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from io import BytesIO
 
 from models import db, User, Prediction
 
@@ -117,11 +121,57 @@ def login():
 @login_required
 def dashboard():
 
-    return render_template(
-        "dashboard.html",
-        user=current_user
-    )
+    predictions = Prediction.query.filter_by(
+        user_id=current_user.id
+    ).all()
 
+    total_predictions = len(predictions)
+
+    diabetic_count = Prediction.query.filter_by(
+        user_id=current_user.id,
+        prediction="Diabetic"
+    ).count()
+
+    non_diabetic_count = Prediction.query.filter_by(
+        user_id=current_user.id,
+        prediction="Non-Diabetic"
+    ).count()
+
+    if total_predictions > 0:
+        average_risk_score = round(
+            sum(p.risk_score for p in predictions) / total_predictions,
+            2
+        )
+    else:
+        average_risk_score = 0
+
+    return render_template(
+    "dashboard.html",
+    user=current_user,
+    total_predictions=total_predictions,
+    diabetic_count=diabetic_count,
+    non_diabetic_count=non_diabetic_count,
+    average_risk_score=average_risk_score,
+
+    pie_labels=["Diabetic", "Non-Diabetic"],
+    pie_values=[diabetic_count, non_diabetic_count],
+
+    risk_labels=[
+        "Very Low Risk",
+        "Low Risk",
+        "Moderate Risk",
+        "High Risk",
+        "Very High Risk"
+    ],
+
+    risk_values=[
+        Prediction.query.filter_by(user_id=current_user.id, risk_level="🟢 Very Low Risk").count(),
+        Prediction.query.filter_by(user_id=current_user.id, risk_level="🟡 Low Risk").count(),
+        Prediction.query.filter_by(user_id=current_user.id, risk_level="🟠 Moderate Risk").count(),
+        Prediction.query.filter_by(user_id=current_user.id, risk_level="🔴 High Risk").count(),
+        Prediction.query.filter_by(user_id=current_user.id, risk_level="🚨 Very High Risk").count(),
+    ]
+)
 
 # ==========================
 # Logout
@@ -353,6 +403,206 @@ def history():
         "history.html",
         predictions=predictions
     )
+# ==========================
+# View Single Prediction
+# ==========================
+@app.route("/history/<int:prediction_id>")
+@login_required
+def view_prediction(prediction_id):
+
+    prediction = Prediction.query.filter_by(
+        id=prediction_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    return render_template(
+        "view_prediction.html",
+        prediction=prediction
+    )         
+# ==========================
+# Download Prediction Report PDF
+# ==========================
+@app.route("/download/<int:prediction_id>")
+@login_required
+def download_prediction(prediction_id):
+
+    prediction = Prediction.query.filter_by(
+        id=prediction_id,
+        user_id=current_user.id
+    ).first_or_404()
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(buffer)
+
+    styles = getSampleStyleSheet()
+
+    story = []
+
+    # ==========================
+    # Report Header
+    # ==========================
+    story.append(Paragraph("<b>🩺 GLUCO TRACK</b>", styles["Title"]))
+    story.append(Paragraph("<b>AI Diabetes Prediction Report</b>", styles["Heading2"]))
+    story.append(Paragraph("<br/>", styles["Normal"]))
+
+    story.append(Paragraph(f"<b>Patient Name:</b> {current_user.full_name}", styles["Normal"]))
+    story.append(Paragraph(f"<b>Email:</b> {current_user.email}", styles["Normal"]))
+    story.append(Paragraph(f"<b>Report Date:</b> {prediction.created_at.strftime('%d-%m-%Y %H:%M')}", styles["Normal"]))
+
+    story.append(Paragraph("<br/>", styles["Normal"]))
+
+    story.append(Paragraph("<b>Prediction Summary</b>", styles["Heading2"]))
+
+    story.append(Paragraph(f"<b>Prediction:</b> {prediction.prediction}", styles["Normal"]))
+    story.append(Paragraph(f"<b>Confidence:</b> {prediction.confidence}%", styles["Normal"]))
+    story.append(Paragraph(f"<b>Risk Score:</b> {prediction.risk_score}/9", styles["Normal"]))
+    story.append(Paragraph(f"<b>Risk Level:</b> {prediction.risk_level}", styles["Normal"]))
+
+  
+    story.append(Paragraph("<br/><b>Risk Factors</b>", styles["Heading2"]))
+
+    for factor in prediction.risk_factors.split("\n"):
+        story.append(Paragraph(f"• {factor}", styles["Normal"]))
+
+  
+    story.append(Paragraph("<br/><b>Food Recommendations</b>", styles["Heading2"]))
+
+    for food in prediction.food_recommendations.split("\n"):
+        story.append(Paragraph(f"• {food}", styles["Normal"]))
+
+   
+    story.append(Paragraph("<br/><b>Lifestyle Recommendations</b>", styles["Heading2"]))
+
+    for tip in prediction.lifestyle_recommendations.split("\n"):
+        story.append(Paragraph(f"• {tip}", styles["Normal"]))
+
+    # ==========================
+    # Disclaimer
+    # ==========================
+    story.append(Paragraph("<br/><b>Disclaimer</b>", styles["Heading2"]))
+
+    story.append(
+        Paragraph(
+            "This report is generated using an AI-based diabetes prediction model for educational purposes only. "
+            "It is not a substitute for professional medical diagnosis or treatment. "
+            "Please consult a qualified healthcare professional for medical advice.",
+            styles["Normal"]
+        )
+    )
+
+    doc.build(story)
+
+    pdf = buffer.getvalue()
+    buffer.close()
+
+    response = make_response(pdf)
+    response.headers["Content-Type"] = "application/pdf"
+    response.headers["Content-Disposition"] = "attachment; filename=Gluco_Track_Report.pdf"
+
+    return response
+# ==========================
+# Profile Page
+# ==========================
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+
+    if request.method == "POST":
+
+        current_user.full_name = request.form["fullname"]
+        current_user.phone = request.form["phone"]
+        current_user.gender = request.form["gender"]
+
+        age = request.form["age"]
+        height = request.form["height"]
+        weight = request.form["weight"]
+
+        current_user.age = int(age) if age else None
+        current_user.height = float(height) if height else None
+        current_user.weight = float(weight) if weight else None
+
+        db.session.commit()
+
+        return redirect(url_for("profile"))
+
+    return render_template(
+        "profile.html",
+        user=current_user
+    )
+
+
+# ==========================
+# Change Password Page
+# ==========================
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+
+    if request.method == "POST":
+
+        current_password = request.form["current_password"]
+        new_password = request.form["new_password"]
+        confirm_password = request.form["confirm_password"]
+
+        # Check current password
+        if not check_password_hash(current_user.password, current_password):
+            return "Current password is incorrect."
+
+        # Check new password confirmation
+        if new_password != confirm_password:
+            return "New passwords do not match."
+
+        # Update password
+        current_user.password = generate_password_hash(new_password)
+
+        db.session.commit()
+
+        return redirect(url_for("profile"))
+
+    return render_template("change_password.html")
+
+# ==========================
+# Health Insights
+# ==========================
+@app.route("/insights")
+@login_required
+def insights():
+
+    predictions = Prediction.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        Prediction.created_at.desc()
+    ).all()
+
+    return render_template(
+        "insights.html",
+        predictions=predictions
+    )
+
+
+# ==========================
+# Overall Report Redirect
+# ==========================
+@app.route("/report")
+@login_required
+def report():
+
+    latest_prediction = Prediction.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        Prediction.created_at.desc()
+    ).first()
+
+    if latest_prediction:
+        return redirect(
+            url_for(
+                "download_prediction",
+                prediction_id=latest_prediction.id
+            )
+        )
+
+    return "No prediction report available."
 # ==========================
 # Create Database Tables
 # ==========================

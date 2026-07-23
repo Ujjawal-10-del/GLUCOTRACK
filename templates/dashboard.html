@@ -1,44 +1,407 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
+{% block content %}
 
-    <title>Dashboard - Gluco Track</title>
+<style>
 
-</head>
+.hero{
+background:linear-gradient(135deg,#0d6e63,#198754);
+color:white;
+padding:40px;
+border-radius:20px;
+margin-bottom:30px;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
 
-<body>
+.hero h2{
+font-weight:700;
+margin-bottom:10px;
+}
 
-    <h1>🏥 Gluco Track Dashboard</h1>
+.hero p{
+opacity:.9;
+font-size:17px;
+}
 
-    <hr>
+.stat-card{
+background:white;
+border-radius:18px;
+padding:25px;
+text-align:center;
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+transition:.35s;
+height:100%;
+}
 
-    <h2>Welcome, {{ user.full_name }} 👋</h2>
+.stat-card:hover{
+transform:translateY(-6px);
+}
 
-    <p>You are successfully logged in.</p>
+.stat-card i{
+font-size:35px;
+color:#198754;
+margin-bottom:12px;
+}
 
-    <hr>
+.stat-card h2{
+font-weight:700;
+margin-bottom:5px;
+color:#198754;
+}
 
-    <h3>Quick Menu</h3>
+.section-title{
+font-weight:700;
+margin:35px 0 20px;
+color:#198754;
+}
 
-    <ul>
+.chart-card{
+background:white;
+padding:20px;
+border-radius:18px;
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
 
-        <li><a href="/profile">👤 My Profile</a></li>
+.action-card{
+background:white;
+border-radius:18px;
+padding:25px;
+box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
 
-        <li><a href="/predict">🩺 Predict Diabetes</a></li>
+.action-btn{
+display:block;
+margin-bottom:15px;
+padding:15px;
+border-radius:12px;
+font-weight:600;
+text-decoration:none;
+text-align:center;
+transition:.3s;
+}
 
-        <li><a href="/history">📜 Prediction History</a></li>
+.action-btn:hover{
+transform:translateY(-3px);
+}
 
-        <li><a href="/insights">📊 Health Insights</a></li>
+</style>
 
-        <li><a href="/report">📄 Download Report</a></li>
+<div class="hero">
 
-        <li><a href="/change-password">🔒 Change Password</a></li>
+<h2>
+👋 Welcome back,
+{{ user.full_name }}
+</h2>
 
-        <li><a href="/logout">🚪 Logout</a></li>
+<p>
 
-    </ul>
+Monitor your diabetes risk using Artificial Intelligence and keep track of your health history.
 
-</body>
+</p>
 
-</html>
+</div>
+
+<div class="row g-4">
+
+<div class="col-md-3">
+
+<div class="stat-card">
+
+<i class="bi bi-clipboard2-pulse-fill"></i>
+
+<h2>{{ total_predictions }}</h2>
+
+<p>Total Predictions</p>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="stat-card">
+
+<i class="bi bi-heart-pulse-fill"></i>
+
+<h2>{{ diabetic_count }}</h2>
+
+<p>Diabetic Cases</p>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="stat-card">
+
+<i class="bi bi-shield-check"></i>
+
+<h2>{{ non_diabetic_count }}</h2>
+
+<p>Healthy Predictions</p>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="stat-card">
+
+<i class="bi bi-speedometer2"></i>
+
+<h2>{{ average_risk_score }}/9</h2>
+
+<p>Average Risk</p>
+
+</div>
+
+</div>
+
+</div>
+<h3 class="section-title">
+📊 Health Analytics
+</h3>
+
+<div class="row g-4">
+
+    <!-- Pie Chart -->
+    <div class="col-lg-6">
+
+        <div class="chart-card">
+
+            <h5 class="text-center mb-4">
+                🥧 Diabetic vs Non-Diabetic
+            </h5>
+
+            <canvas id="pieChart"></canvas>
+
+        </div>
+
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="col-lg-6">
+
+        <div class="chart-card">
+
+            <h5 class="text-center mb-4">
+                📈 Risk Level Distribution
+            </h5>
+
+            <canvas id="barChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+<h3 class="section-title">
+
+⚡ Quick Actions
+
+</h3>
+
+<div class="row g-4">
+
+<div class="col-md-3">
+
+<a href="/predict" class="btn btn-success w-100 py-3 shadow">
+
+<i class="bi bi-capsule-pill"></i><br><br>
+
+Predict Diabetes
+
+</a>
+
+</div>
+
+<div class="col-md-3">
+
+<a href="/history" class="btn btn-primary w-100 py-3 shadow">
+
+<i class="bi bi-clock-history"></i><br><br>
+
+Prediction History
+
+</a>
+
+</div>
+
+<div class="col-md-3">
+
+<a href="/profile" class="btn btn-warning w-100 py-3 shadow text-dark">
+
+<i class="bi bi-person-circle"></i><br><br>
+
+My Profile
+
+</a>
+
+</div>
+
+<div class="col-md-3">
+
+<a href="/report" class="btn btn-danger w-100 py-3 shadow">
+
+<i class="bi bi-file-earmark-pdf-fill"></i><br><br>
+
+Download Report
+
+</a>
+
+</div>
+
+</div>
+
+<div class="mt-5">
+
+<div class="alert alert-success shadow-sm rounded-4 p-4">
+
+<h5>
+
+💚 Health Reminder
+
+</h5>
+
+<p class="mb-0">
+
+Regular exercise, balanced nutrition, adequate sleep, and routine health checkups
+can significantly reduce your risk of diabetes and improve your overall well-being.
+
+</p>
+
+</div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// ==========================
+// Pie Chart
+// ==========================
+
+new Chart(document.getElementById("pieChart"), {
+
+type: "doughnut",
+
+data: {
+
+labels: {{ pie_labels | tojson }},
+
+datasets: [{
+
+data: {{ pie_values | tojson }},
+
+backgroundColor: [
+
+"#dc3545",
+
+"#198754"
+
+],
+
+borderWidth:2,
+
+hoverOffset:15
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+position:"bottom"
+
+}
+
+}
+
+}
+
+});
+
+// ==========================
+// Bar Chart
+// ==========================
+
+new Chart(document.getElementById("barChart"),{
+
+type:"bar",
+
+data:{
+
+labels:{{ risk_labels | tojson }},
+
+datasets:[{
+
+label:"Predictions",
+
+data:{{ risk_values | tojson }},
+
+backgroundColor:[
+
+"#198754",
+
+"#ffc107",
+
+"#fd7e14",
+
+"#dc3545",
+
+"#6f42c1"
+
+],
+
+borderRadius:10
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+display:false
+
+}
+
+},
+
+scales:{
+
+y:{
+
+beginAtZero:true,
+
+ticks:{
+
+stepSize:1
+
+}
+
+}
+
+}
+
+}
+
+});
+
+</script>
+
+{% endblock %}

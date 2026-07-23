@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>📊 Health Insights</h2>
+
+<hr>
+
+<div class="card p-4">
+
+    <h4>Total Predictions: {{ predictions|length }}</h4>
+
+    <hr>
+
+    {% if predictions %}
+
+    <table class="table table-bordered">
+
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Prediction</th>
+                <th>Risk Score</th>
+                <th>Risk Level</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for p in predictions %}
+
+        <tr>
+
+            <td>{{ p.created_at.strftime("%d-%m-%Y") }}</td>
+
+            <td>{{ p.prediction }}</td>
+
+            <td>{{ p.risk_score }}/9</td>
+
+            <td>{{ p.risk_level }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+    <p>No prediction history available.</p>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

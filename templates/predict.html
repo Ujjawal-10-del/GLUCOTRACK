@@ -1,58 +1,381 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <title>Predict Diabetes - Gluco Track</title>
-</head>
+{% block content %}
 
-<body>
+<style>
 
-<h1>🩺 Diabetes Prediction</h1>
+.predict-header{
 
-<hr>
+background:linear-gradient(135deg,#0d6e63,#198754);
+
+color:white;
+
+padding:35px;
+
+border-radius:20px;
+
+margin-bottom:30px;
+
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+
+}
+
+.predict-header h2{
+
+font-weight:700;
+
+}
+
+.form-card{
+
+background:white;
+
+padding:35px;
+
+border-radius:20px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+.section-title{
+
+font-weight:700;
+
+color:#198754;
+
+margin-bottom:20px;
+
+}
+
+.form-label{
+
+font-weight:600;
+
+}
+
+.form-control{
+
+border-radius:12px;
+
+padding:12px;
+
+}
+
+.input-group-text{
+
+background:#198754;
+
+color:white;
+
+border:none;
+
+}
+
+.predict-btn{
+
+background:linear-gradient(135deg,#198754,#0d6e63);
+
+color:white;
+
+font-weight:700;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+font-size:18px;
+
+transition:.3s;
+
+}
+
+.predict-btn:hover{
+
+transform:translateY(-3px);
+
+box-shadow:0 10px 20px rgba(0,0,0,.15);
+
+}
+
+</style>
+
+<div class="predict-header">
+
+<h2>
+🩺 Diabetes Prediction
+</h2>
+
+<p class="mb-0">
+
+Fill in the patient's clinical information below to generate an AI-powered diabetes prediction.
+
+</p>
+
+</div>
+
+<div class="form-card">
 
 <form method="POST">
 
-<label>Pregnancies</label><br>
-<input type="number" name="pregnancies" required><br><br>
+<div class="row">
 
-<label>Glucose</label><br>
-<input type="number" name="glucose" required><br><br>
+<div class="col-lg-6">
 
-<label>Blood Pressure</label><br>
-<input type="number" name="blood_pressure" required><br><br>
+<h4 class="section-title">
 
-<label>Skin Thickness</label><br>
-<input type="number" name="skin_thickness" required><br><br>
+👤 Personal Information
 
-<label>Insulin</label><br>
-<input type="number" name="insulin" required><br><br>
+</h4>
+<!-- Pregnancies -->
 
-<label>BMI</label><br>
-<input type="number" step="0.1" name="bmi" required><br><br>
+<div class="mb-4">
 
-<label>Diabetes Pedigree Function</label><br>
-<input type="number" step="0.001" name="dpf" required><br><br>
+<label class="form-label">Pregnancies</label>
 
-<label>Age</label><br>
-<input type="number" name="age" required><br><br>
+<div class="input-group">
 
-<button type="submit">
-Predict
+<span class="input-group-text">
+<i class="bi bi-person-hearts"></i>
+</span>
+
+<input
+type="number"
+class="form-control"
+name="pregnancies"
+placeholder="Enter number of pregnancies"
+required>
+
+</div>
+
+</div>
+
+<!-- Age -->
+
+<div class="mb-4">
+
+<label class="form-label">Age</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-calendar-heart"></i>
+</span>
+
+<input
+type="number"
+class="form-control"
+name="age"
+placeholder="Enter age"
+required>
+
+</div>
+
+</div>
+
+<!-- Diabetes Pedigree Function -->
+
+<div class="mb-4">
+
+<label class="form-label">
+
+Diabetes Pedigree Function
+
+</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-diagram-3-fill"></i>
+</span>
+
+<input
+type="number"
+step="0.001"
+class="form-control"
+name="dpf"
+placeholder="Example: 0.351"
+required>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-lg-6">
+
+<h4 class="section-title">
+
+🩺 Clinical Measurements
+
+</h4>
+
+<!-- Glucose -->
+
+<div class="mb-4">
+
+<label class="form-label">Glucose</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-droplet-fill"></i>
+</span>
+
+<input
+type="number"
+class="form-control"
+name="glucose"
+placeholder="mg/dL"
+required>
+
+</div>
+
+</div>
+
+<!-- Blood Pressure -->
+
+<div class="mb-4">
+
+<label class="form-label">
+
+Blood Pressure
+
+</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-heart-pulse-fill"></i>
+</span>
+
+<input
+type="number"
+class="form-control"
+name="blood_pressure"
+placeholder="mmHg"
+required>
+
+</div>
+
+</div>
+
+<!-- Skin Thickness -->
+
+<div class="mb-4">
+
+<label class="form-label">
+
+Skin Thickness
+
+</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-layers-fill"></i>
+</span>
+
+<input
+type="number"
+class="form-control"
+name="skin_thickness"
+placeholder="mm"
+required>
+
+</div>
+
+</div>
+<!-- Insulin -->
+
+<div class="mb-4">
+
+<label class="form-label">Insulin</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-capsule"></i>
+</span>
+
+<input
+type="number"
+class="form-control"
+name="insulin"
+placeholder="μU/mL"
+required>
+
+</div>
+
+</div>
+
+<!-- BMI -->
+
+<div class="mb-4">
+
+<label class="form-label">BMI</label>
+
+<div class="input-group">
+
+<span class="input-group-text">
+<i class="bi bi-person-bounding-box"></i>
+</span>
+
+<input
+type="number"
+step="0.1"
+class="form-control"
+name="bmi"
+placeholder="Body Mass Index"
+required>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<hr class="my-4">
+
+<div class="text-center">
+
+<button
+type="submit"
+class="btn predict-btn px-5"
+id="predictBtn">
+
+<i class="bi bi-cpu-fill"></i>
+Predict Diabetes
+
 </button>
+
+</div>
 
 </form>
 
-</body>
-</html>
-{% if prediction %}
+</div>
 
-<hr>
+<script>
 
-<h2>Prediction Result</h2>
+const form = document.querySelector("form");
+const btn = document.getElementById("predictBtn");
 
-<h3>{{ prediction }}</h3>
+form.addEventListener("submit", function(){
 
-<h4>Confidence: {{ confidence }}%</h4>
+btn.innerHTML = `
+<span class="spinner-border spinner-border-sm me-2"></span>
+Predicting...
+`;
 
-{% endif %}
+btn.disabled = true;
+
+});
+
+</script>
+
+{% endblock %}

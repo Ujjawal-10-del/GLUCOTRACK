@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Report</title>
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background:#f4f6f9;
+            margin:40px;
+        }
+
+        .container{
+            max-width:800px;
+            margin:auto;
+            background:white;
+            padding:30px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,.1);
+        }
+
+        h1,h2{
+            text-align:center;
+            color:#0b6e4f;
+        }
+
+        hr{
+            margin:20px 0;
+        }
+
+        ul{
+            padding-left:20px;
+        }
+
+        .btn{
+            display:inline-block;
+            margin-top:20px;
+            padding:12px 20px;
+            background:#0b6e4f;
+            color:white;
+            text-decoration:none;
+            border-radius:6px;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h1>🩺 Gluco Track</h1>
+<h2>Saved Prediction Report</h2>
+
+<hr>
+
+<p><strong>Prediction:</strong> {{ prediction.prediction }}</p>
+<p><strong>Confidence:</strong> {{ prediction.confidence }}%</p>
+<p><strong>Risk Score:</strong> {{ prediction.risk_score }}/9</p>
+<p><strong>Risk Level:</strong> {{ prediction.risk_level }}</p>
+<p><strong>Date:</strong> {{ prediction.created_at.strftime("%d-%m-%Y %H:%M") }}</p>
+
+<hr>
+
+<h3>⚠ Key Risk Factors</h3>
+
+<ul>
+{% for factor in prediction.risk_factors.split('\n') %}
+    <li>{{ factor }}</li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h3>🥗 Food Recommendations</h3>
+
+<ul>
+{% for food in prediction.food_recommendations.split('\n') %}
+    <li>{{ food }}</li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h3>🏃 Lifestyle Recommendations</h3>
+
+<ul>
+{% for tip in prediction.lifestyle_recommendations.split('\n') %}
+    <li>{{ tip }}</li>
+{% endfor %}
+</ul>
+
+<a href="{{ url_for('download_prediction', prediction_id=prediction.id) }}" class="btn">
+    📄 Download PDF
+</a>
+
+<a href="{{ url_for('history') }}" class="btn">
+    ⬅ Back to History
+</a>
+
+</div>
+
+</body>
+</html>
