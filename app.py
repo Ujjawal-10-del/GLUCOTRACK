@@ -276,15 +276,15 @@ def predict():
         # Health Risk Level
         # --------------------------
         if risk_score <= 2:
-            risk_level = "🟢 Very Low Risk"
+            risk_level = "Very Low Risk"
         elif risk_score <= 4:
-            risk_level = "🟡 Low Risk"
+            risk_level = "Low Risk"
         elif risk_score <= 6:
-            risk_level = "🟠 Moderate Risk"
+            risk_level = " Moderate Risk"
         elif risk_score <= 8:
-            risk_level = "🔴 High Risk"
+            risk_level = " High Risk"
         else:
-            risk_level = "🚨 Very High Risk"
+            risk_level = "Very High Risk"
         print("Risk Score =", risk_score)
         print("Risk Level =", risk_level)
                 # --------------------------
