@@ -4,6 +4,11 @@ import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { Heart, Mail, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { loginSchema, getZodFieldErrors } from '../utils/schemas';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Card, CardHeader, CardContent } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -41,133 +46,103 @@ const Login: React.FC = () => {
     }
   };
 
-  const fieldStyle = (field: 'email' | 'password') => ({
-    width: '100%',
-    padding: '0.875rem 1rem 0.875rem 2.75rem',
-    background: '#FFFFFF',
-    border: `1.5px solid ${touched[field] && errors[field] ? '#DC2626' : touched[field] && !errors[field] ? '#16A34A' : '#E2E8F0'}`,
-    borderRadius: '0.875rem',
-    color: '#0F172A',
-    fontSize: '1rem',
-    transition: 'all 0.2s ease',
-    outline: 'none',
-  });
+  const getBorderClass = (field: 'email' | 'password') => {
+    if (touched[field]) {
+      return errors[field] ? 'border-danger focus-visible:ring-danger/20' : 'border-success focus-visible:ring-success/20';
+    }
+    return 'border-border-color';
+  };
 
   return (
-    <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <div style={{ width: '100%', maxWidth: '430px' }}>
+    <div className="min-h-[85vh] flex items-center justify-center p-8">
+      <div className="w-full max-w-[430px]">
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            width: '64px', height: '64px', margin: '0 auto 1rem',
-            background: 'linear-gradient(135deg, #0F766E, #115E59)',
-            borderRadius: '20px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(15, 118, 110, 0.25)'
-          }}>
-            <Heart size={30} color="white" fill="white" />
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 bg-linear-to-br from-primary to-[#115E59] rounded-[20px] flex items-center justify-center shadow-lg shadow-primary/20">
+            <Heart size={30} className="text-white fill-white" />
           </div>
-          <h2 style={{ margin: 0, color: '#0F172A' }}>Welcome back!</h2>
-          <p style={{ color: '#64748B', margin: '0.4rem 0 0' }}>Sign in to your GlucoTrack account</p>
+          <h2 className="text-2xl font-bold text-text-primary tracking-tight">Welcome back!</h2>
+          <p className="text-text-secondary mt-1.5">Sign in to your GlucoTrack account</p>
         </div>
 
         {/* Card */}
-        <div style={{
-          background: '#FFFFFF', borderRadius: '1.5rem',
-          padding: '2rem',
-          boxShadow: '0 8px 30px rgba(15, 23, 42, 0.05)',
-          border: '1px solid #E2E8F0'
-        }}>
-          {serverError && (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              background: '#FEF2F2', border: '1px solid #FECACA',
-              borderRadius: '0.75rem', padding: '0.75rem 1rem', marginBottom: '1.5rem'
-            }}>
-              <AlertCircle size={16} style={{ color: '#DC2626', flexShrink: 0 }} />
-              <p style={{ margin: 0, color: '#DC2626', fontSize: '0.9rem' }}>{serverError}</p>
-            </div>
-          )}
+        <Card className="shadow-lg border border-border-color">
+          <CardHeader className="pb-0" />
+          <CardContent className="pt-0">
+            {serverError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle size={16} />
+                <AlertDescription>{serverError}</AlertDescription>
+              </Alert>
+            )}
 
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Email */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#0F172A' }}>
-                Email Address
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={17} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  onBlur={() => handleBlur('email')}
-                  style={fieldStyle('email')}
-                />
-                {touched.email && !errors.email && (
-                  <CheckCircle2 size={17} style={{ position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#16A34A' }} />
+            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    onBlur={() => handleBlur('email')}
+                    className={`pl-10 ${getBorderClass('email')}`}
+                  />
+                  {touched.email && !errors.email && (
+                    <CheckCircle2 size={17} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-success" />
+                  )}
+                </div>
+                {touched.email && errors.email && (
+                  <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
+                    <AlertCircle size={13} /> {errors.email}
+                  </p>
                 )}
               </div>
-              {touched.email && errors.email && (
-                <p style={{ margin: '0.4rem 0 0 0.25rem', fontSize: '0.8rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <AlertCircle size={13} /> {errors.email}
-                </p>
-              )}
-            </div>
 
-            {/* Password */}
-            <div style={{ marginBottom: '1.75rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#0F172A' }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={17} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  onBlur={() => handleBlur('password')}
-                  style={fieldStyle('password')}
-                />
-                {touched.password && !errors.password && (
-                  <CheckCircle2 size={17} style={{ position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#16A34A' }} />
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    onBlur={() => handleBlur('password')}
+                    className={`pl-10 ${getBorderClass('password')}`}
+                  />
+                  {touched.password && !errors.password && (
+                    <CheckCircle2 size={17} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-success" />
+                  )}
+                </div>
+                {touched.password && errors.password && (
+                  <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
+                    <AlertCircle size={13} /> {errors.password}
+                  </p>
                 )}
               </div>
-              {touched.password && errors.password && (
-                <p style={{ margin: '0.4rem 0 0 0.25rem', fontSize: '0.8rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <AlertCircle size={13} /> {errors.password}
-                </p>
-              )}
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%', padding: '0.9rem',
-                borderRadius: '999px', border: 'none',
-                background: loading || !isValid ? '#E2E8F0' : '#0F766E',
-                color: loading || !isValid ? '#94A3B8' : 'white',
-                fontWeight: 700, fontSize: '1rem',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: !loading && isValid ? '0 4px 14px rgba(15, 118, 110, 0.25)' : 'none'
-              }}
-            >
-              {loading ? 'Signing in…' : 'Sign In'}
-            </button>
-          </form>
+              <Button
+                type="submit"
+                disabled={loading || !isValid}
+                className="w-full h-11 rounded-full text-base font-bold transition-all shadow-md shadow-primary/20 disabled:shadow-none"
+              >
+                {loading ? 'Signing in…' : 'Sign In'}
+              </Button>
+            </form>
 
-          <p style={{ textAlign: 'center', marginTop: '1.25rem', marginBottom: 0, fontSize: '0.9rem', color: '#64748B' }}>
-            Don't have an account?{' '}
-            <Link to="/register" style={{ color: '#0F766E', fontWeight: 600, textDecoration: 'none' }}>Register here</Link>
-          </p>
-        </div>
+            <p className="text-center mt-5 text-sm text-text-secondary">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-primary font-semibold hover:underline">Register here</Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

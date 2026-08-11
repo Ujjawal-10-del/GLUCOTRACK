@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../AuthContext';
-import { User, Key, AlertCircle } from 'lucide-react';
+import { User as UserIcon, Key, AlertCircle, Edit, X, ShieldCheck, Mail, Calendar, Ruler, Weight } from 'lucide-react';
 import { profileSchema, changePasswordSchema, getZodFieldErrors } from '../utils/schemas';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select } from '../components/ui/select';
+import { Card } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
 
 const Profile: React.FC = () => {
   const { user, checkAuth } = useAuth();
@@ -19,6 +25,9 @@ const Profile: React.FC = () => {
     new_password: '',
     confirm_password: ''
   });
+
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   const [profileTouched, setProfileTouched] = useState<Record<string, boolean>>({});
   const [passwordTouched, setPasswordTouched] = useState<Record<string, boolean>>({});
@@ -73,7 +82,7 @@ const Profile: React.FC = () => {
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileTouched({ fullname: true, age: true, height: true, weight: true });
+    setProfileTouched({ fullname: true, phone: true, age: true, height: true, weight: true });
     if (!isProfileValid) return;
 
     setSaving(true);
@@ -82,6 +91,7 @@ const Profile: React.FC = () => {
     try {
       await axios.post('/profile', profileData);
       setMessage({ type: 'success', text: 'Profile updated successfully' });
+      setIsEditingProfile(false);
       checkAuth();
     } catch (err: any) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to update profile' });
@@ -103,6 +113,7 @@ const Profile: React.FC = () => {
       setMessage({ type: 'success', text: 'Password changed successfully' });
       setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
       setPasswordTouched({});
+      setIsChangingPassword(false);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to change password' });
     } finally {
@@ -110,166 +121,399 @@ const Profile: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="container mt-8 text-center text-muted">Loading profile...</div>;
+  const getProfileBorderClass = (field: string) => {
+    if (profileTouched[field] && profileErrors[field]) {
+      return 'border-danger focus-visible:ring-danger/20';
+    }
+    return 'border-border-color';
+  };
+
+  const getPasswordBorderClass = (field: string) => {
+    if (passwordTouched[field] && passwordErrors[field]) {
+      return 'border-danger focus-visible:ring-danger/20';
+    }
+    return 'border-border-color';
+  };
+
+  const getInitials = (name: string) => {
+    return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
+  };
+
+  if (loading) return <div className="text-center mt-12 text-text-secondary font-medium">Loading profile...</div>;
 
   return (
-    <div className="container animate-fade-in" style={{ paddingBottom: '3rem' }}>
-      <div className="mb-8">
-        <h2 style={{ margin: 0, color: '#0F172A' }}>My Profile</h2>
-        <p style={{ margin: '0.4rem 0 0', color: '#64748B' }}>Manage your personal information and security settings.</p>
+    <div className="max-w-[1100px] mx-auto px-6 py-8 space-y-8 animate-fade-in">
+      {/* Page Header */}
+      <div>
+        <h2 className="text-2xl font-bold text-text-primary tracking-tight">My Profile</h2>
+        <p className="text-text-secondary mt-1">Manage your personal information and account security.</p>
       </div>
 
       {message.text && (
-        <div className={`badge ${message.type === 'error' ? 'badge-danger' : 'badge-success'} mb-6 p-3 block w-full text-center`} style={{ display: 'block' }}>
-          {message.text}
-        </div>
+        <Alert variant={message.type === 'error' ? 'destructive' : 'success'}>
+          <AlertCircle size={16} />
+          <AlertDescription>{message.text}</AlertDescription>
+        </Alert>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Personal Information */}
-        <div className="card">
-          <h4 className="flex items-center gap-2 mb-6" style={{ color: '#0F172A' }}>
-            <User size={20} style={{ color: '#0F766E' }} /> Personal Information
-          </h4>
-
-          <form onSubmit={handleProfileSubmit} noValidate>
-            <div className="form-group">
-              <label className="form-label" htmlFor="fullname">Full Name</label>
-              <input
-                type="text" id="fullname" className="form-input"
-                value={profileData.fullname} onChange={handleProfileChange}
-                onBlur={() => setProfileTouched(prev => ({ ...prev, fullname: true }))}
-                style={{ borderColor: profileTouched.fullname && profileErrors.fullname ? '#DC2626' : undefined }}
-              />
-              {profileTouched.fullname && profileErrors.fullname && (
-                <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <AlertCircle size={12} /> {profileErrors.fullname}
-                </p>
-              )}
+      {/* User Summary Header Banner */}
+      <Card className="p-6 bg-linear-to-r from-white via-slate-50 to-teal-50/30 border border-border-color shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
+          <div className="flex items-center gap-4 text-center sm:text-left">
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md shrink-0">
+              {getInitials(profileData.fullname || user?.full_name || '')}
             </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="email">Email Address</label>
-              <input type="email" id="email" className="form-input" value={user?.email || ''} disabled style={{ opacity: 0.65, cursor: 'not-allowed' }} />
+            <div>
+              <h3 className="text-xl font-bold text-text-primary">
+                {profileData.fullname || user?.full_name || 'User'}
+              </h3>
+              <p className="text-sm text-text-secondary flex items-center justify-center sm:justify-start gap-1.5 mt-1">
+                <Mail size={14} className="text-text-muted" />
+                {user?.email}
+              </p>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="form-group mb-0">
-                <label className="form-label" htmlFor="phone">Phone Number</label>
-                <input type="tel" id="phone" className="form-input" value={profileData.phone} onChange={handleProfileChange} />
+          <div className="flex items-center gap-3 shrink-0">
+            <Button
+              onClick={() => {
+                setIsEditingProfile(true);
+                setIsChangingPassword(false);
+              }}
+              variant={isEditingProfile ? "default" : "outline"}
+              className="rounded-full gap-2 font-semibold cursor-pointer"
+            >
+              <Edit size={16} />
+              Update Profile
+            </Button>
+            <Button
+              onClick={() => {
+                setIsChangingPassword(true);
+                setIsEditingProfile(false);
+              }}
+              variant={isChangingPassword ? "default" : "outline"}
+              className="rounded-full gap-2 font-semibold cursor-pointer"
+            >
+              <Key size={16} />
+              Change Password
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* ── Section 1: Update Profile Form (Appears when Update Profile is clicked) ── */}
+      {isEditingProfile && (
+        <Card className="p-8 border-2 border-primary/20 shadow-md animate-slide-up">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border-color">
+            <h4 className="flex items-center gap-2 font-bold text-lg text-text-primary">
+              <UserIcon size={20} className="text-primary" /> Update Profile Details
+            </h4>
+            <Button
+              onClick={() => setIsEditingProfile(false)}
+              variant="ghost"
+              size="sm"
+              className="rounded-full cursor-pointer text-text-muted hover:text-text-primary"
+            >
+              <X size={18} /> Cancel
+            </Button>
+          </div>
+
+          <form onSubmit={handleProfileSubmit} noValidate className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="fullname">Full Name</Label>
+                <Input
+                  type="text"
+                  id="fullname"
+                  value={profileData.fullname}
+                  onChange={handleProfileChange}
+                  onBlur={() => setProfileTouched(prev => ({ ...prev, fullname: true }))}
+                  className={getProfileBorderClass('fullname')}
+                />
+                {profileTouched.fullname && profileErrors.fullname && (
+                  <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
+                    <AlertCircle size={12} /> {profileErrors.fullname}
+                  </p>
+                )}
               </div>
-              <div className="form-group mb-0">
-                <label className="form-label" htmlFor="gender">Gender</label>
-                <select id="gender" className="form-input" value={profileData.gender} onChange={handleProfileChange}>
-                  <option value="">Select</option>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  value={user?.email || ''}
+                  disabled
+                  className="bg-slate-100 cursor-not-allowed opacity-75"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  type="tel"
+                  id="phone"
+                  placeholder="e.g. +1 234 567 890"
+                  value={profileData.phone}
+                  onChange={handleProfileChange}
+                  onBlur={() => setProfileTouched(prev => ({ ...prev, phone: true }))}
+                  className={getProfileBorderClass('phone')}
+                />
+                {profileTouched.phone && profileErrors.phone && (
+                  <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
+                    <AlertCircle size={12} /> {profileErrors.phone}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select
+                  id="gender"
+                  value={profileData.gender}
+                  onChange={handleProfileChange}
+                >
+                  <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                   <option value="Other">Other</option>
-                </select>
+                </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="form-group mb-0">
-                <label className="form-label" htmlFor="age">Age</label>
-                <input
-                  type="number" id="age" className="form-input"
-                  value={profileData.age} onChange={handleProfileChange}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="age">Age (years)</Label>
+                <Input
+                  type="number"
+                  id="age"
+                  placeholder="e.g. 35"
+                  value={profileData.age}
+                  onChange={handleProfileChange}
                   onBlur={() => setProfileTouched(prev => ({ ...prev, age: true }))}
-                  style={{ borderColor: profileTouched.age && profileErrors.age ? '#DC2626' : undefined }}
+                  className={getProfileBorderClass('age')}
                 />
                 {profileTouched.age && profileErrors.age && (
-                  <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626' }}>{profileErrors.age}</p>
+                  <p className="mt-1 text-xs text-danger pl-1">{profileErrors.age}</p>
                 )}
               </div>
 
-              <div className="form-group mb-0">
-                <label className="form-label" htmlFor="height">Height (cm)</label>
-                <input
-                  type="number" id="height" className="form-input"
-                  value={profileData.height} onChange={handleProfileChange}
+              <div className="space-y-2">
+                <Label htmlFor="height">Height (cm)</Label>
+                <Input
+                  type="number"
+                  id="height"
+                  placeholder="e.g. 175"
+                  value={profileData.height}
+                  onChange={handleProfileChange}
                   onBlur={() => setProfileTouched(prev => ({ ...prev, height: true }))}
-                  style={{ borderColor: profileTouched.height && profileErrors.height ? '#DC2626' : undefined }}
+                  className={getProfileBorderClass('height')}
                 />
                 {profileTouched.height && profileErrors.height && (
-                  <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626' }}>{profileErrors.height}</p>
+                  <p className="mt-1 text-xs text-danger pl-1">{profileErrors.height}</p>
                 )}
               </div>
 
-              <div className="form-group mb-0">
-                <label className="form-label" htmlFor="weight">Weight (kg)</label>
-                <input
-                  type="number" id="weight" className="form-input"
-                  value={profileData.weight} onChange={handleProfileChange}
+              <div className="space-y-2">
+                <Label htmlFor="weight">Weight (kg)</Label>
+                <Input
+                  type="number"
+                  id="weight"
+                  placeholder="e.g. 70"
+                  value={profileData.weight}
+                  onChange={handleProfileChange}
                   onBlur={() => setProfileTouched(prev => ({ ...prev, weight: true }))}
-                  style={{ borderColor: profileTouched.weight && profileErrors.weight ? '#DC2626' : undefined }}
+                  className={getProfileBorderClass('weight')}
                 />
                 {profileTouched.weight && profileErrors.weight && (
-                  <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626' }}>{profileErrors.weight}</p>
+                  <p className="mt-1 text-xs text-danger pl-1">{profileErrors.weight}</p>
                 )}
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={saving || !isProfileValid}>Save Changes</button>
+            <div className="flex justify-end gap-3 pt-4 border-t border-border-color">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditingProfile(false)}
+                className="rounded-full cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={saving || !isProfileValid}
+                className="rounded-full cursor-pointer px-6 font-bold shadow-md"
+              >
+                {saving ? 'Saving...' : 'Save Profile Changes'}
+              </Button>
+            </div>
           </form>
-        </div>
+        </Card>
+      )}
 
-        {/* Change Password */}
-        <div className="card">
-          <h4 className="flex items-center gap-2 mb-6" style={{ color: '#0F172A' }}>
-            <Key size={20} style={{ color: '#F59E0B' }} /> Change Password
-          </h4>
+      {/* ── Section 2: Change Password Form (Appears when Change Password is clicked) ── */}
+      {isChangingPassword && (
+        <Card className="p-8 border-2 border-amber-200 shadow-md animate-slide-up max-w-[600px] mx-auto">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border-color">
+            <h4 className="flex items-center gap-2 font-bold text-lg text-text-primary">
+              <Key size={20} className="text-warning" /> Change Account Password
+            </h4>
+            <Button
+              onClick={() => setIsChangingPassword(false)}
+              variant="ghost"
+              size="sm"
+              className="rounded-full cursor-pointer text-text-muted hover:text-text-primary"
+            >
+              <X size={18} /> Cancel
+            </Button>
+          </div>
 
-          <form onSubmit={handlePasswordSubmit} noValidate>
-            <div className="form-group">
-              <label className="form-label" htmlFor="current_password">Current Password</label>
-              <input
-                type="password" id="current_password" className="form-input"
-                value={passwordData.current_password} onChange={handlePasswordChange}
+          <form onSubmit={handlePasswordSubmit} noValidate className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="current_password">Current Password</Label>
+              <Input
+                type="password"
+                id="current_password"
+                placeholder="Enter current password"
+                value={passwordData.current_password}
+                onChange={handlePasswordChange}
                 onBlur={() => setPasswordTouched(prev => ({ ...prev, current_password: true }))}
-                style={{ borderColor: passwordTouched.current_password && passwordErrors.current_password ? '#DC2626' : undefined }}
+                className={getPasswordBorderClass('current_password')}
               />
               {passwordTouched.current_password && passwordErrors.current_password && (
-                <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
                   <AlertCircle size={12} /> {passwordErrors.current_password}
                 </p>
               )}
             </div>
 
-            <div className="form-group">
-              <label className="form-label" htmlFor="new_password">New Password</label>
-              <input
-                type="password" id="new_password" className="form-input"
-                value={passwordData.new_password} onChange={handlePasswordChange}
+            <div className="space-y-2">
+              <Label htmlFor="new_password">New Password</Label>
+              <Input
+                type="password"
+                id="new_password"
+                placeholder="Enter new password (min. 6 characters)"
+                value={passwordData.new_password}
+                onChange={handlePasswordChange}
                 onBlur={() => setPasswordTouched(prev => ({ ...prev, new_password: true }))}
-                style={{ borderColor: passwordTouched.new_password && passwordErrors.new_password ? '#DC2626' : undefined }}
+                className={getPasswordBorderClass('new_password')}
               />
               {passwordTouched.new_password && passwordErrors.new_password && (
-                <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
                   <AlertCircle size={12} /> {passwordErrors.new_password}
                 </p>
               )}
             </div>
 
-            <div className="form-group mb-6">
-              <label className="form-label" htmlFor="confirm_password">Confirm New Password</label>
-              <input
-                type="password" id="confirm_password" className="form-input"
-                value={passwordData.confirm_password} onChange={handlePasswordChange}
+            <div className="space-y-2">
+              <Label htmlFor="confirm_password">Confirm New Password</Label>
+              <Input
+                type="password"
+                id="confirm_password"
+                placeholder="Confirm new password"
+                value={passwordData.confirm_password}
+                onChange={handlePasswordChange}
                 onBlur={() => setPasswordTouched(prev => ({ ...prev, confirm_password: true }))}
-                style={{ borderColor: passwordTouched.confirm_password && passwordErrors.confirm_password ? '#DC2626' : undefined }}
+                className={getPasswordBorderClass('confirm_password')}
               />
               {passwordTouched.confirm_password && passwordErrors.confirm_password && (
-                <p style={{ margin: '0.35rem 0 0 0.2rem', fontSize: '0.78rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
                   <AlertCircle size={12} /> {passwordErrors.confirm_password}
                 </p>
               )}
             </div>
 
-            <button type="submit" className="btn btn-secondary" disabled={saving || !isPasswordValid}>Update Password</button>
+            <div className="flex justify-end gap-3 pt-4 border-t border-border-color">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsChangingPassword(false)}
+                className="rounded-full cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="secondary"
+                disabled={saving || !isPasswordValid}
+                className="rounded-full cursor-pointer px-6 font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-md"
+              >
+                {saving ? 'Updating...' : 'Update Password'}
+              </Button>
+            </div>
           </form>
+        </Card>
+      )}
+
+      {/* ── Section 3: Profile Overview Cards (Displayed when not editing) ── */}
+      {!isEditingProfile && !isChangingPassword && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="p-6 md:col-span-2 space-y-6">
+            <h4 className="flex items-center gap-2 font-bold text-text-primary border-b border-border-color pb-3">
+              <UserIcon size={18} className="text-primary" /> Personal Details
+            </h4>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-1">
+                <p className="text-xs text-text-secondary font-medium">Full Name</p>
+                <p className="text-base font-semibold text-text-primary">{profileData.fullname || 'Not specified'}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs text-text-secondary font-medium">Email Address</p>
+                <p className="text-base font-semibold text-text-primary">{user?.email || 'Not specified'}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs text-text-secondary font-medium">Phone Number</p>
+                <p className="text-base font-semibold text-text-primary">{profileData.phone || 'Not specified'}</p>
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-xs text-text-secondary font-medium">Gender</p>
+                <p className="text-base font-semibold text-text-primary">{profileData.gender || 'Not specified'}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 space-y-6">
+            <h4 className="flex items-center gap-2 font-bold text-text-primary border-b border-border-color pb-3">
+              <ShieldCheck size={18} className="text-primary" /> Vitals Summary
+            </h4>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-border-color">
+                <span className="text-xs text-text-secondary font-medium flex items-center gap-2">
+                  <Calendar size={14} className="text-primary" /> Age
+                </span>
+                <span className="font-bold text-text-primary text-sm">
+                  {profileData.age ? `${profileData.age} yrs` : '—'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-border-color">
+                <span className="text-xs text-text-secondary font-medium flex items-center gap-2">
+                  <Ruler size={14} className="text-primary" /> Height
+                </span>
+                <span className="font-bold text-text-primary text-sm">
+                  {profileData.height ? `${profileData.height} cm` : '—'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-border-color">
+                <span className="text-xs text-text-secondary font-medium flex items-center gap-2">
+                  <Weight size={14} className="text-primary" /> Weight
+                </span>
+                <span className="font-bold text-text-primary text-sm">
+                  {profileData.weight ? `${profileData.weight} kg` : '—'}
+                </span>
+              </div>
+            </div>
+          </Card>
         </div>
-      </div>
+      )}
     </div>
   );
 };

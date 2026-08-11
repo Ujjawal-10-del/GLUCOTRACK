@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { Heart, Mail, Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Heart, Mail, Lock, User as UserIcon, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { registerSchema, getZodFieldErrors } from '../utils/schemas';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Card, CardHeader, CardContent } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
 
 const Register: React.FC = () => {
   const [fullname, setFullname] = useState('');
@@ -33,7 +38,14 @@ const Register: React.FC = () => {
   };
   const strength = getStrength();
   const strengthLabel = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'][strength];
-  const strengthColor = ['', '#DC2626', '#F59E0B', '#2563EB', '#16A34A', '#0F766E'][strength];
+  const strengthColor = [
+    '',
+    'bg-danger text-danger',
+    'bg-warning text-warning',
+    'bg-secondary text-secondary',
+    'bg-success text-success',
+    'bg-primary text-primary'
+  ][strength];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,129 +63,162 @@ const Register: React.FC = () => {
     }
   };
 
-  const inputStyle = (field: string) => ({
-    width: '100%',
-    padding: '0.875rem 2.75rem 0.875rem 2.75rem',
-    background: '#FFFFFF',
-    border: `1.5px solid ${touched[field] && errors[field] ? '#DC2626' : touched[field] && !errors[field] ? '#16A34A' : '#E2E8F0'}`,
-    borderRadius: '0.875rem',
-    color: '#0F172A',
-    fontSize: '1rem',
-    transition: 'all 0.2s ease',
-    outline: 'none',
-  });
+  const getBorderClass = (field: string) => {
+    if (touched[field]) {
+      return errors[field] ? 'border-danger focus-visible:ring-danger/20' : 'border-success focus-visible:ring-success/20';
+    }
+    return 'border-border-color';
+  };
 
   const ErrorMsg = ({ field }: { field: string }) =>
     touched[field] && errors[field] ? (
-      <p style={{ margin: '0.4rem 0 0 0.25rem', fontSize: '0.8rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+      <p className="mt-1 text-xs text-danger flex items-center gap-1.5 pl-1">
         <AlertCircle size={13} /> {errors[field]}
       </p>
     ) : null;
 
   const ValidIcon = ({ field }: { field: string }) =>
     touched[field] && !errors[field] ? (
-      <CheckCircle2 size={17} style={{ position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#16A34A' }} />
+      <CheckCircle2 size={17} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-success" />
     ) : null;
 
   return (
-    <div style={{ minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-      <div style={{ width: '100%', maxWidth: '450px' }}>
+    <div className="min-h-[85vh] flex items-center justify-center p-8">
+      <div className="w-full max-w-[450px]">
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            width: '64px', height: '64px', margin: '0 auto 1rem',
-            background: 'linear-gradient(135deg, #0F766E, #115E59)',
-            borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(15, 118, 110, 0.25)'
-          }}>
-            <Heart size={30} color="white" fill="white" />
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto mb-4 bg-linear-to-br from-primary to-[#115E59] rounded-[20px] flex items-center justify-center shadow-lg shadow-primary/20">
+            <Heart size={30} className="text-white fill-white" />
           </div>
-          <h2 style={{ margin: 0, color: '#0F172A' }}>Create Account</h2>
-          <p style={{ color: '#64748B', margin: '0.4rem 0 0' }}>Join GlucoTrack today</p>
+          <h2 className="text-2xl font-bold text-text-primary tracking-tight">Create Account</h2>
+          <p className="text-text-secondary mt-1.5">Join GlucoTrack today</p>
         </div>
 
-        <div style={{ background: '#FFFFFF', borderRadius: '1.5rem', padding: '2rem', boxShadow: '0 8px 30px rgba(15, 23, 42, 0.05)', border: '1px solid #E2E8F0' }}>
-          {serverError && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '0.75rem', padding: '0.75rem 1rem', marginBottom: '1.5rem' }}>
-              <AlertCircle size={16} style={{ color: '#DC2626', flexShrink: 0 }} />
-              <p style={{ margin: 0, color: '#DC2626', fontSize: '0.9rem' }}>{serverError}</p>
-            </div>
-          )}
+        <Card className="shadow-lg border border-border-color">
+          <CardHeader className="pb-0" />
+          <CardContent className="pt-0">
+            {serverError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle size={16} />
+                <AlertDescription>{serverError}</AlertDescription>
+              </Alert>
+            )}
 
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Full Name */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#0F172A' }}>Full Name</label>
-              <div style={{ position: 'relative' }}>
-                <User size={17} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input id="fullname" type="text" placeholder="John Doe" value={fullname} onChange={e => setFullname(e.target.value)} onBlur={() => handleBlur('fullname')} style={inputStyle('fullname')} />
-                <ValidIcon field="fullname" />
-              </div>
-              <ErrorMsg field="fullname" />
-            </div>
-
-            {/* Email */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#0F172A' }}>Email Address</label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={17} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input id="email" type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} onBlur={() => handleBlur('email')} style={inputStyle('email')} />
-                <ValidIcon field="email" />
-              </div>
-              <ErrorMsg field="email" />
-            </div>
-
-            {/* Password */}
-            <div style={{ marginBottom: '1.25rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#0F172A' }}>Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={17} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} onBlur={() => handleBlur('password')} style={{ ...inputStyle('password'), paddingRight: '3rem' }} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' }}>
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
-              </div>
-              {password && (
-                <div style={{ marginTop: '0.5rem' }}>
-                  <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
-                    {[1, 2, 3, 4, 5].map(i => (
-                      <div key={i} style={{ flex: 1, height: '4px', borderRadius: '999px', background: i <= strength ? strengthColor : '#E2E8F0', transition: 'background 0.3s ease' }} />
-                    ))}
-                  </div>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: strengthColor, fontWeight: 600 }}>{strengthLabel}</p>
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+              {/* Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="fullname">Full Name</Label>
+                <div className="relative">
+                  <UserIcon size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    id="fullname"
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullname}
+                    onChange={e => setFullname(e.target.value)}
+                    onBlur={() => handleBlur('fullname')}
+                    className={`pl-10 ${getBorderClass('fullname')}`}
+                  />
+                  <ValidIcon field="fullname" />
                 </div>
-              )}
-              <ErrorMsg field="password" />
-            </div>
-
-            {/* Confirm Password */}
-            <div style={{ marginBottom: '1.75rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#0F172A' }}>Confirm Password</label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={17} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                <input id="confirmPassword" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} onBlur={() => handleBlur('confirmPassword')} style={inputStyle('confirmPassword')} />
-                <ValidIcon field="confirmPassword" />
+                <ErrorMsg field="fullname" />
               </div>
-              <ErrorMsg field="confirmPassword" />
-            </div>
 
-            <button type="submit" disabled={loading} style={{
-              width: '100%', padding: '0.9rem', borderRadius: '999px', border: 'none',
-              background: loading || !isValid ? '#E2E8F0' : '#0F766E',
-              color: loading || !isValid ? '#94A3B8' : 'white',
-              fontWeight: 700, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: !loading && isValid ? '0 4px 14px rgba(15, 118, 110, 0.25)' : 'none'
-            }}>
-              {loading ? 'Creating account…' : 'Create Account'}
-            </button>
-          </form>
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    onBlur={() => handleBlur('email')}
+                    className={`pl-10 ${getBorderClass('email')}`}
+                  />
+                  <ValidIcon field="email" />
+                </div>
+                <ErrorMsg field="email" />
+              </div>
 
-          <p style={{ textAlign: 'center', marginTop: '1.25rem', marginBottom: 0, fontSize: '0.9rem', color: '#64748B' }}>
-            Already have an account?{' '}
-            <Link to="/login" style={{ color: '#0F766E', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link>
-          </p>
-        </div>
+              {/* Password */}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    onBlur={() => handleBlur('password')}
+                    className={`pl-10 pr-10 ${getBorderClass('password')}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                  >
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
+                {password && (
+                  <div className="mt-2">
+                    <div className="flex gap-1 mb-1">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <div
+                          key={i}
+                          className={`flex-1 h-1 rounded-full transition-colors duration-300 ${
+                            i <= strength ? strengthColor.split(' ')[0] : 'bg-slate-100'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className={`text-[11px] font-semibold ${strengthColor.split(' ')[1]}`}>
+                      {strengthLabel}
+                    </p>
+                  </div>
+                )}
+                <ErrorMsg field="password" />
+              </div>
+
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                  <Input
+                    id="confirmPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    onBlur={() => handleBlur('confirmPassword')}
+                    className={`pl-10 ${getBorderClass('confirmPassword')}`}
+                  />
+                  <ValidIcon field="confirmPassword" />
+                </div>
+                <ErrorMsg field="confirmPassword" />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading || !isValid}
+                className="w-full h-11 rounded-full text-base font-bold transition-all shadow-md shadow-primary/20 disabled:shadow-none"
+              >
+                {loading ? 'Creating account…' : 'Create Account'}
+              </Button>
+            </form>
+
+            <p className="text-center mt-5 text-sm text-text-secondary">
+              Already have an account?{' '}
+              <Link to="/login" className="text-primary font-semibold hover:underline">Sign in</Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

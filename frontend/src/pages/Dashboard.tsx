@@ -10,6 +10,8 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer,
   Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 
 interface DashboardData {
   total_predictions: number;
@@ -23,16 +25,9 @@ interface DashboardData {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div style={{
-        background: '#FFFFFF',
-        border: '1px solid #E2E8F0',
-        borderRadius: '12px',
-        padding: '0.75rem 1rem',
-        boxShadow: '0 8px 25px rgba(15, 23, 42, 0.08)',
-        fontSize: '0.9rem'
-      }}>
-        <p style={{ color: '#64748B', marginBottom: '0.25rem', fontWeight: 500 }}>{label || payload[0].name}</p>
-        <p style={{ color: '#0F172A', fontWeight: 700, margin: 0 }}>{payload[0].value}</p>
+      <div className="bg-white border border-border-color rounded-xl p-3 shadow-lg text-sm">
+        <p className="text-text-secondary mb-1 font-medium">{label || payload[0].name}</p>
+        <p className="text-text-primary font-bold">{payload[0].value}</p>
       </div>
     );
   }
@@ -68,15 +63,13 @@ const Dashboard: React.FC = () => {
   };
 
   if (loading) return (
-    <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
-      <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-        <Heart size={40} style={{ color: '#0F766E', animation: 'pulse 1.5s ease-in-out infinite' }} />
-        <p style={{ color: '#64748B', margin: 0 }}>Loading your health dashboard…</p>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+      <Heart size={40} className="text-primary animate-pulse" />
+      <p className="text-text-secondary text-sm">Loading your health dashboard…</p>
     </div>
   );
 
-  if (error) return <div className="container mt-8 text-center" style={{ color: '#DC2626' }}>{error}</div>;
+  if (error) return <div className="text-center mt-8 text-danger font-semibold">{error}</div>;
   if (!data) return null;
 
   // Specified colors: Healthy = #16A34A, Diabetic/High Risk = #DC2626
@@ -93,168 +86,113 @@ const Dashboard: React.FC = () => {
     : 0;
 
   return (
-    <div className="container animate-fade-in" style={{ paddingBottom: '3rem' }}>
+    <div className="max-w-[1200px] mx-auto px-6 py-8 space-y-8 animate-fade-in">
 
       {/* ── Hero Greeting Banner ── */}
-      <div style={{
-        background: 'linear-gradient(135deg, #0F766E 0%, #115E59 100%)',
-        borderRadius: '1.5rem',
-        padding: '2.5rem 2.5rem',
-        marginBottom: '2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        boxShadow: '0 8px 30px rgba(15, 118, 110, 0.25)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute', right: '-40px', top: '-40px',
-          width: '200px', height: '200px',
-          borderRadius: '50%', background: 'rgba(255,255,255,0.08)'
-        }} />
-        <div style={{
-          position: 'absolute', right: '80px', bottom: '-60px',
-          width: '150px', height: '150px',
-          borderRadius: '50%', background: 'rgba(255,255,255,0.05)'
-        }} />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: '0.25rem', fontSize: '1rem', fontWeight: 500 }}>
-            {getGreeting()},
-          </p>
-          <h2 style={{ color: 'white', margin: 0, fontSize: '2.25rem' }}>{user?.full_name} 👋</h2>
-          <p style={{ color: 'rgba(255,255,255,0.8)', marginTop: '0.5rem', marginBottom: 0 }}>
+      <div className="relative overflow-hidden bg-linear-to-br from-primary to-[#115E59] rounded-2xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-lg shadow-primary/20">
+        <div className="absolute right-[-40px] top-[-40px] w-[200px] h-[200px] rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute right-[80px] bottom-[-60px] w-[150px] h-[150px] rounded-full bg-white/5 pointer-events-none" />
+        
+        <div className="relative z-10 space-y-1">
+          <p className="text-white/80 text-sm font-medium">{getGreeting()},</p>
+          <h2 className="text-3xl font-bold text-white">{user?.full_name} 👋</h2>
+          <p className="text-white/75 text-sm">
             Here is your health status and prediction overview.
           </p>
         </div>
-        <button
+        
+        <Button
           onClick={() => navigate('/predict')}
-          style={{
-            background: '#FFFFFF',
-            color: '#0F766E',
-            border: 'none',
-            padding: '0.85rem 1.75rem',
-            borderRadius: '999px',
-            fontWeight: 700,
-            fontSize: '1rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
-            position: 'relative', zIndex: 1,
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-            flexShrink: 0
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; }}
+          variant="secondary"
+          size="lg"
+          className="relative z-10 bg-white hover:bg-slate-50 text-primary font-bold shadow-md shrink-0 flex items-center gap-2 rounded-full cursor-pointer transition-transform hover:-translate-y-0.5 active:translate-y-0"
         >
-          <Zap size={18} /> New Prediction <ArrowRight size={16} />
-        </button>
+          <Zap size={18} className="fill-primary" /> New Prediction <ArrowRight size={16} />
+        </Button>
       </div>
 
       {/* ── Stat Cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem', marginBottom: '2rem' }}>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1 */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{
-              width: '48px', height: '48px', borderRadius: '14px',
-              background: '#CCFBF1',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <Activity size={22} style={{ color: '#0F766E' }} />
+        <Card className="flex flex-col justify-between p-6">
+          <div className="flex justify-between items-start">
+            <div className="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
+              <Activity size={22} className="text-primary" />
             </div>
-            <span style={{
-              background: '#CCFBF1',
-              color: '#0F766E', fontSize: '0.75rem', fontWeight: 600,
-              padding: '0.25rem 0.6rem', borderRadius: '999px'
-            }}>Total</span>
+            <span className="bg-primary-light text-primary text-[11px] font-bold px-2.5 py-1 rounded-full">
+              Total
+            </span>
           </div>
-          <div>
-            <p style={{ margin: 0, color: '#64748B', fontSize: '0.875rem', fontWeight: 500 }}>Total Predictions</p>
-            <h2 style={{ margin: '0.25rem 0 0', fontSize: '2.5rem', color: '#0F172A', lineHeight: 1 }}>
+          <div className="mt-4">
+            <p className="text-text-secondary text-sm font-medium">Total Predictions</p>
+            <h2 className="text-4xl font-bold text-text-primary mt-1">
               {data.total_predictions}
             </h2>
           </div>
-        </div>
+        </Card>
 
         {/* Card 2 - Healthy */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{
-              width: '48px', height: '48px', borderRadius: '14px',
-              background: '#DCFCE7',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <CheckCircle size={22} style={{ color: '#16A34A' }} />
+        <Card className="flex flex-col justify-between p-6">
+          <div className="flex justify-between items-start">
+            <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+              <CheckCircle size={22} className="text-success" />
             </div>
-            <span style={{
-              background: '#DCFCE7',
-              color: '#16A34A', fontSize: '0.75rem', fontWeight: 600,
-              padding: '0.25rem 0.6rem', borderRadius: '999px'
-            }}>Healthy</span>
+            <span className="bg-green-50 text-success text-[11px] font-bold px-2.5 py-1 rounded-full">
+              Healthy
+            </span>
           </div>
-          <div>
-            <p style={{ margin: 0, color: '#64748B', fontSize: '0.875rem', fontWeight: 500 }}>Non-Diabetic Results</p>
-            <h2 style={{ margin: '0.25rem 0 0', fontSize: '2.5rem', color: '#16A34A', lineHeight: 1 }}>
+          <div className="mt-4">
+            <p className="text-text-secondary text-sm font-medium">Non-Diabetic Results</p>
+            <h2 className="text-4xl font-bold text-success mt-1">
               {data.non_diabetic_count}
             </h2>
           </div>
-        </div>
+        </Card>
 
         {/* Card 3 – Risk Score */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{
-              width: '48px', height: '48px', borderRadius: '14px',
-              background: '#FEF3C7',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <ShieldAlert size={22} style={{ color: '#F59E0B' }} />
+        <Card className="flex flex-col justify-between p-6">
+          <div className="flex justify-between items-start">
+            <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+              <ShieldAlert size={22} className="text-warning" />
             </div>
-            <span style={{
-              background: '#FEF3C7',
-              color: '#B45309', fontSize: '0.75rem', fontWeight: 600,
-              padding: '0.25rem 0.6rem', borderRadius: '999px'
-            }}>Avg</span>
+            <span className="bg-amber-50 text-[#B45309] text-[11px] font-bold px-2.5 py-1 rounded-full">
+              Avg Risk
+            </span>
           </div>
-          <div>
-            <p style={{ margin: 0, color: '#64748B', fontSize: '0.875rem', fontWeight: 500 }}>Average Risk Score</p>
-            <h2 style={{ margin: '0.25rem 0 0.75rem', fontSize: '2.5rem', color: '#0F172A', lineHeight: 1 }}>
-              {data.average_risk_score} <span style={{ fontSize: '1rem', color: '#94A3B8', fontWeight: 400 }}>/ 9</span>
+          <div className="mt-4">
+            <p className="text-text-secondary text-sm font-medium">Average Risk Score</p>
+            <h2 className="text-4xl font-bold text-text-primary mt-1 flex items-baseline gap-1">
+              {data.average_risk_score} 
+              <span className="text-sm text-text-muted font-normal">/ 9</span>
             </h2>
             {/* Progress bar */}
-            <div style={{ height: '6px', background: '#E2E8F0', borderRadius: '999px', overflow: 'hidden' }}>
-              <div style={{
-                height: '100%',
-                width: `${riskPercent}%`,
-                background: 'linear-gradient(90deg, #16A34A, #F59E0B, #DC2626)',
-                borderRadius: '999px',
-                transition: 'width 1s ease'
-              }} />
+            <div className="h-1.5 w-full bg-slate-100 rounded-full mt-3 overflow-hidden">
+              <div 
+                className="h-full rounded-full bg-linear-to-r from-success via-warning to-danger transition-all duration-1000"
+                style={{ width: `${riskPercent}%` }}
+              />
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* ── Charts Row ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.25rem' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
         {/* Donut Chart – Prediction Split */}
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
-            <TrendingUp size={20} style={{ color: '#0F766E' }} />
-            <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#0F172A' }}>Prediction Overview</h4>
+        <Card className="lg:col-span-2 p-6 flex flex-col">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp size={20} className="text-primary" />
+            <h4 className="font-semibold text-text-primary">Prediction Overview</h4>
           </div>
-          <div style={{ height: '270px' }}>
+          <div className="h-[270px] w-full relative">
             {data.total_predictions > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieData}
                     cx="50%" cy="50%"
-                    innerRadius={65} outerRadius={100}
+                    innerRadius={65} outerRadius={95}
                     paddingAngle={4}
                     dataKey="value"
                     strokeWidth={0}
@@ -268,51 +206,51 @@ const Dashboard: React.FC = () => {
                     iconType="circle"
                     iconSize={10}
                     formatter={(value) => (
-                      <span style={{ color: '#64748B', fontSize: '0.875rem' }}>{value}</span>
+                      <span className="text-text-secondary text-xs font-medium ml-1">{value}</span>
                     )}
                   />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '0.75rem' }}>
-                <Heart size={40} style={{ color: '#E2E8F0' }} />
-                <p style={{ color: '#94A3B8', margin: 0, textAlign: 'center', fontSize: '0.9rem' }}>No predictions yet.<br />Make your first assessment!</p>
+              <div className="flex flex-col items-center justify-center h-full gap-3">
+                <Heart size={40} className="text-slate-200" />
+                <p className="text-text-muted text-center text-sm">
+                  No predictions yet.<br />Make your first assessment!
+                </p>
               </div>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Bar Chart – Risk Level Distribution */}
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.5rem' }}>
-            <BarChart2 size={20} style={{ color: '#0F766E' }} />
-            <h4 style={{ margin: 0, fontSize: '1.05rem', color: '#0F172A' }}>Risk Level Distribution</h4>
+        <Card className="lg:col-span-3 p-6 flex flex-col">
+          <div className="flex items-center gap-2 mb-6">
+            <BarChart2 size={20} className="text-primary" />
+            <h4 className="font-semibold text-text-primary">Risk Level Distribution</h4>
           </div>
-          <div style={{ height: '270px' }}>
+          <div className="h-[270px] w-full relative">
             {data.total_predictions > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data.risk_distribution}
-                  margin={{ top: 5, right: 10, left: -20, bottom: 55 }}
+                  margin={{ top: 5, right: 10, left: -25, bottom: 5 }}
                   barCategoryGap="35%"
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                   <XAxis
                     dataKey="name"
-                    tick={{ fill: '#64748B', fontSize: 11 }}
+                    tick={{ fill: '#64748B', fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
-                    angle={-35}
-                    textAnchor="end"
                     interval={0}
                   />
                   <YAxis
-                    tick={{ fill: '#64748B', fontSize: 12 }}
+                    tick={{ fill: '#64748B', fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     allowDecimals={false}
                   />
-                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(15, 118, 110, 0.05)' }} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(15, 118, 110, 0.03)' }} />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                     {data.risk_distribution.map((_, index) => (
                       <Cell key={index} fill={riskColors[index % riskColors.length]} />
@@ -321,13 +259,13 @@ const Dashboard: React.FC = () => {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '0.75rem' }}>
-                <BarChart2 size={40} style={{ color: '#E2E8F0' }} />
-                <p style={{ color: '#94A3B8', margin: 0, fontSize: '0.9rem' }}>No data available yet.</p>
+              <div className="flex flex-col items-center justify-center h-full gap-3">
+                <BarChart2 size={40} className="text-slate-200" />
+                <p className="text-text-muted text-sm">No data available yet.</p>
               </div>
             )}
           </div>
-        </div>
+        </Card>
       </div>
 
     </div>

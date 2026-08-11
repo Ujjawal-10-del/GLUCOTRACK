@@ -44,58 +44,58 @@ export const predictSchema = z.object({
   pregnancies: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Pregnancies is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0, 'Minimum value is 0')
       .max(17, 'Maximum value is 17')
   ),
   glucose: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Glucose Level is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0, 'Minimum value is 0')
-      .max(199, 'Maximum value is 199')
+      .max(398, 'Maximum value is 398')
   ),
   blood_pressure: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Blood Pressure is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0, 'Minimum value is 0')
-      .max(122, 'Maximum value is 122')
+      .max(244, 'Maximum value is 244')
   ),
   skin_thickness: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Skin Thickness is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0, 'Minimum value is 0')
-      .max(99, 'Maximum value is 99')
+      .max(198, 'Maximum value is 198')
   ),
   insulin: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Insulin is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0, 'Minimum value is 0')
-      .max(846, 'Maximum value is 846')
+      .max(1692, 'Maximum value is 1692')
   ),
   bmi: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'BMI is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0, 'Minimum value is 0')
-      .max(67.1, 'Maximum value is 67.1')
+      .max(134.2, 'Maximum value is 134.2')
   ),
   dpf: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Diabetes Pedigree is required' })
+      .number({ message: 'Enter a valid number' })
       .min(0.078, 'Minimum value is 0.078')
-      .max(2.42, 'Maximum value is 2.42')
+      .max(4.84, 'Maximum value is 4.84')
   ),
   age: z.preprocess(
     (v) => (v === '' ? undefined : Number(v)),
     z
-      .number({ invalid_type_error: 'Enter a valid number', required_error: 'Age is required' })
+      .number({ message: 'Enter a valid number' })
       .min(21, 'Minimum value is 21')
-      .max(81, 'Maximum value is 81')
+      .max(162, 'Maximum value is 162')
   ),
 });
 
@@ -104,7 +104,7 @@ export type PredictFormData = z.infer<typeof predictSchema>;
 // ── Profile Schemas ──
 export const profileSchema = z.object({
   fullname: z.string().min(1, 'Full name is required'),
-  phone: z.string().optional(),
+  phone: z.string().max(30, 'Phone number cannot exceed 30 numbers').optional(),
   gender: z.string().optional(),
   age: z.preprocess(
     (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),

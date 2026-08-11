@@ -5,6 +5,7 @@ import {
   Activity, LayoutDashboard, History, User,
   LogOut, Heart
 } from 'lucide-react';
+import { Button } from './ui/button';
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
@@ -26,60 +27,35 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <aside style={{
-      width: '260px',
-      height: '100vh',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      zIndex: 100,
-      background: '#FFFFFF',
-      borderRight: '1px solid #E2E8F0',
-      boxShadow: '4px 0 20px rgba(15, 23, 42, 0.03)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      padding: '1.75rem 1.25rem',
-    }}>
+    <aside className="w-[260px] h-screen fixed top-0 left-0 z-50 bg-white border-r border-border-color shadow-sm flex flex-col justify-between p-7">
       {/* ── Top Section: Logo & Nav Links ── */}
       <div>
         {/* Logo */}
-        <Link to="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem', paddingLeft: '0.5rem' }}>
-          <div style={{
-            width: '42px', height: '42px',
-            background: 'linear-gradient(135deg, #0F766E, #0d655f)',
-            borderRadius: '12px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(15, 118, 110, 0.25)'
-          }}>
-            <Heart size={22} color="white" fill="white" />
+        <Link to="/dashboard" className="no-underline flex items-center gap-3 mb-10 pl-2">
+          <div className="w-[42px] h-[42px] bg-linear-to-br from-primary to-[#0d655f] rounded-xl flex items-center justify-center shadow-md shadow-primary/20">
+            <Heart size={22} className="text-white fill-white" />
           </div>
-          <span style={{ fontWeight: 700, fontSize: '1.3rem', color: '#0F172A', letterSpacing: '-0.03em' }}>
-            Gluco<span style={{ color: '#0F766E' }}>Track</span>
+          <span className="font-bold text-xl text-text-primary tracking-tight">
+            Gluco<span className="text-primary">Track</span>
           </span>
         </Link>
 
         {/* Navigation Links */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="flex flex-col gap-2">
           {navLinks.map(link => (
             <NavLink
               key={link.to}
               to={link.to}
-              style={{ textDecoration: 'none' }}
+              className="no-underline"
             >
               {({ isActive }) => (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: '0.85rem',
-                  padding: '0.85rem 1.15rem',
-                  borderRadius: '1rem',
-                  fontWeight: isActive ? 600 : 500,
-                  fontSize: '0.98rem',
-                  color: isActive ? '#0F766E' : '#64748B',
-                  background: isActive ? '#CCFBF1' : 'transparent',
-                  transition: 'all 0.2s ease',
-                }}>
+                <div className={`flex items-center gap-3.5 px-4.5 py-3.5 rounded-2xl font-semibold text-[15px] transition-all duration-250 ${
+                  isActive 
+                    ? 'text-primary bg-primary-light' 
+                    : 'text-text-secondary hover:bg-slate-50 hover:text-text-primary'
+                }`}>
                   {React.cloneElement(link.icon, {
-                    style: { color: isActive ? '#0F766E' : '#94A3B8' }
+                    className: isActive ? 'text-primary' : 'text-text-muted group-hover:text-text-primary'
                   })}
                   {link.label}
                 </div>
@@ -90,106 +66,43 @@ const Navigation: React.FC = () => {
       </div>
 
       {/* ── Bottom Section: Profile & Logout ── */}
-      <div style={{
-        borderTop: '1px solid #E2E8F0',
-        paddingTop: '1.25rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.75rem'
-      }}>
-        {/* User Card */}
+      <div className="border-t border-border-color pt-5 flex flex-col gap-3">
+        {/* User Profile Card */}
         <NavLink
           to="/profile"
-          style={{ textDecoration: 'none' }}
+          className="no-underline"
         >
           {({ isActive }) => (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem',
-              borderRadius: '1rem',
-              background: isActive ? '#CCFBF1' : '#F8FAFC',
-              border: '1px solid #E2E8F0',
-              transition: 'all 0.2s ease',
-              cursor: 'pointer'
-            }}>
-              <div style={{
-                width: '38px',
-                height: '38px',
-                background: '#0F766E',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                flexShrink: 0
-              }}>
+            <div className={`flex items-center gap-3 p-3 rounded-2xl border transition-all duration-250 cursor-pointer ${
+              isActive 
+                ? 'bg-primary-light border-primary/20' 
+                : 'bg-bg-primary border-border-color hover:border-slate-300'
+            }`}>
+              <div className="w-[38px] h-[38px] bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                 {user?.full_name ? getInitials(user.full_name) : 'U'}
               </div>
-              <div style={{ overflow: 'hidden', flex: 1 }}>
-                <p style={{
-                  margin: 0,
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  color: '#0F172A',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
+              <div className="overflow-hidden flex-1">
+                <p className="m-0 font-semibold text-[14px] text-text-primary truncate">
                   {user?.full_name || 'User'}
                 </p>
-                <p style={{
-                  margin: 0,
-                  fontSize: '0.78rem',
-                  color: '#64748B',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
-                }}>
+                <p className="m-0 text-[12px] text-text-secondary truncate">
                   {user?.email || ''}
                 </p>
               </div>
-              <User size={16} style={{ color: isActive ? '#0F766E' : '#64748B', flexShrink: 0 }} />
+              <User size={16} className={isActive ? 'text-primary' : 'text-text-secondary'} />
             </div>
           )}
         </NavLink>
 
         {/* Logout Button */}
-        <button
+        <Button
           onClick={handleLogout}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.6rem',
-            width: '100%',
-            padding: '0.75rem',
-            borderRadius: '1rem',
-            border: '1px solid #E2E8F0',
-            background: '#F8FAFC',
-            color: '#64748B',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = '#FEF2F2';
-            e.currentTarget.style.borderColor = '#FECACA';
-            e.currentTarget.style.color = '#DC2626';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = '#F8FAFC';
-            e.currentTarget.style.borderColor = '#E2E8F0';
-            e.currentTarget.style.color = '#64748B';
-          }}
+          variant="outline"
+          className="w-full justify-center gap-2 bg-bg-primary hover:bg-danger/5 hover:text-danger hover:border-danger/20"
         >
           <LogOut size={16} />
           Logout
-        </button>
+        </Button>
       </div>
     </aside>
   );
