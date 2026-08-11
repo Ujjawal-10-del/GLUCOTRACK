@@ -3,11 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../AuthContext';
 import { Heart, Mail, Lock, AlertCircle, CheckCircle2 } from 'lucide-react';
-
-interface FieldErrors {
-  email?: string;
-  password?: string;
-}
+import { loginSchema, getZodFieldErrors } from '../utils/schemas';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,25 +14,12 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const validate = (): FieldErrors => {
-    const errors: FieldErrors = {};
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = 'Enter a valid email address';
-    }
-    if (!password) {
-      errors.password = 'Password is required';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-    return errors;
-  };
+  // ── Zod Schema Live Validation ──
+  const validationResult = loginSchema.safeParse({ email, password });
+  const errors = !validationResult.success ? getZodFieldErrors(validationResult.error) : {};
+  const isValid = validationResult.success;
 
-  const errors = validate();
-  const isValid = Object.keys(errors).length === 0;
-
-  const handleBlur = (field: string) => {
+  const handleBlur = (field: 'email' | 'password') => {
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 

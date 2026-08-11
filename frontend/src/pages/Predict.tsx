@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Activity, AlertTriangle, CheckCircle, Info, AlertCircle, CheckCircle2, Zap, Download } from 'lucide-react';
+import { predictSchema, getZodFieldErrors } from '../utils/schemas';
 
 interface PredictionResult {
   id: number;
@@ -26,16 +27,6 @@ const fieldConfig: { id: FormField; label: string; unit: string; min: number; ma
   { id: 'age',           label: 'Age',                      unit: 'years',   min: 21,    max: 81,   step: 1,     hint: 'Age in years (21 – 81)' },
 ];
 
-const validateField = (id: FormField, value: string): string => {
-  if (value === '' || value === undefined) return 'This field is required';
-  const num = parseFloat(value);
-  const cfg = fieldConfig.find(f => f.id === id)!;
-  if (isNaN(num)) return 'Enter a valid number';
-  if (num < cfg.min) return `Minimum value is ${cfg.min}`;
-  if (num > cfg.max) return `Maximum value is ${cfg.max}`;
-  return '';
-};
-
 const Predict: React.FC = () => {
   const [formData, setFormData] = useState<Record<FormField, string>>({
     pregnancies: '', glucose: '', blood_pressure: '', skin_thickness: '',
@@ -49,9 +40,10 @@ const Predict: React.FC = () => {
   const [serverError, setServerError] = useState('');
   const [result, setResult] = useState<PredictionResult | null>(null);
 
-  const fieldErrors: Record<FormField, string> = {} as any;
-  fieldConfig.forEach(f => { fieldErrors[f.id] = validateField(f.id, formData[f.id]); });
-  const isValid = Object.values(fieldErrors).every(e => e === '');
+  // ── Zod Schema Live Validation ──
+  const validationResult = predictSchema.safeParse(formData);
+  const fieldErrors = !validationResult.success ? getZodFieldErrors(validationResult.error) : {};
+  const isValid = validationResult.success;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const id = e.target.id as FormField;
@@ -163,7 +155,7 @@ const Predict: React.FC = () => {
     <div className="container animate-fade-in" style={{ paddingBottom: '3rem' }}>
       <div style={{ marginBottom: '2rem' }}>
         <h2 style={{ margin: 0, color: '#0F172A' }}>Health Assessment</h2>
-        <p style={{ margin: '0.4rem 0 0', color: '#64748B' }}>Enter your health metrics below. Each field will validate in real-time.</p>
+        <p style={{ margin: '0.4rem 0 0', color: '#64748B' }}>Enter your health metrics below. Verified with Zod schema validation in real-time.</p>
       </div>
 
       {serverError && (
@@ -224,14 +216,14 @@ const Predict: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isValid}
               style={{
                 display: 'flex', alignItems: 'center', gap: '0.5rem',
                 padding: '0.85rem 2rem', borderRadius: '999px', border: 'none',
-                background: loading ? '#E2E8F0' : '#0F766E',
-                color: loading ? '#94A3B8' : 'white',
-                fontWeight: 700, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: !loading ? '0 4px 14px rgba(15, 118, 110, 0.25)' : 'none',
+                background: loading || !isValid ? '#E2E8F0' : '#0F766E',
+                color: loading || !isValid ? '#94A3B8' : 'white',
+                fontWeight: 700, fontSize: '1rem', cursor: loading || !isValid ? 'not-allowed' : 'pointer',
+                boxShadow: !loading && isValid ? '0 4px 14px rgba(15, 118, 110, 0.25)' : 'none',
                 transition: 'all 0.2s ease'
               }}
             >

@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Heart, Mail, Lock, User, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
-
-interface FieldErrors {
-  fullname?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-}
+import { registerSchema, getZodFieldErrors } from '../utils/schemas';
 
 const Register: React.FC = () => {
   const [fullname, setFullname] = useState('');
@@ -21,35 +15,10 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validate = (): FieldErrors => {
-    const errors: FieldErrors = {};
-    if (!fullname.trim()) {
-      errors.fullname = 'Full name is required';
-    } else if (fullname.trim().length < 2) {
-      errors.fullname = 'Name must be at least 2 characters';
-    }
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = 'Enter a valid email address';
-    }
-    if (!password) {
-      errors.password = 'Password is required';
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    } else if (!/[A-Z]/.test(password)) {
-      errors.password = 'Include at least one uppercase letter';
-    }
-    if (!confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password';
-    } else if (password !== confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-    return errors;
-  };
-
-  const errors = validate();
-  const isValid = Object.keys(errors).length === 0;
+  // ── Zod Schema Live Validation ──
+  const validationResult = registerSchema.safeParse({ fullname, email, password, confirmPassword });
+  const errors = !validationResult.success ? getZodFieldErrors(validationResult.error) : {};
+  const isValid = validationResult.success;
 
   const handleBlur = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
@@ -86,7 +55,7 @@ const Register: React.FC = () => {
     width: '100%',
     padding: '0.875rem 2.75rem 0.875rem 2.75rem',
     background: '#FFFFFF',
-    border: `1.5px solid ${touched[field] && errors[field as keyof FieldErrors] ? '#DC2626' : touched[field] && !errors[field as keyof FieldErrors] ? '#16A34A' : '#E2E8F0'}`,
+    border: `1.5px solid ${touched[field] && errors[field] ? '#DC2626' : touched[field] && !errors[field] ? '#16A34A' : '#E2E8F0'}`,
     borderRadius: '0.875rem',
     color: '#0F172A',
     fontSize: '1rem',
@@ -94,14 +63,14 @@ const Register: React.FC = () => {
     outline: 'none',
   });
 
-  const ErrorMsg = ({ field }: { field: keyof FieldErrors }) =>
+  const ErrorMsg = ({ field }: { field: string }) =>
     touched[field] && errors[field] ? (
       <p style={{ margin: '0.4rem 0 0 0.25rem', fontSize: '0.8rem', color: '#DC2626', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
         <AlertCircle size={13} /> {errors[field]}
       </p>
     ) : null;
 
-  const ValidIcon = ({ field }: { field: keyof FieldErrors }) =>
+  const ValidIcon = ({ field }: { field: string }) =>
     touched[field] && !errors[field] ? (
       <CheckCircle2 size={17} style={{ position: 'absolute', right: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#16A34A' }} />
     ) : null;
@@ -190,11 +159,11 @@ const Register: React.FC = () => {
 
             <button type="submit" disabled={loading} style={{
               width: '100%', padding: '0.9rem', borderRadius: '999px', border: 'none',
-              background: loading ? '#E2E8F0' : '#0F766E',
-              color: loading ? '#94A3B8' : 'white',
+              background: loading || !isValid ? '#E2E8F0' : '#0F766E',
+              color: loading || !isValid ? '#94A3B8' : 'white',
               fontWeight: 700, fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              boxShadow: !loading ? '0 4px 14px rgba(15, 118, 110, 0.25)' : 'none'
+              boxShadow: !loading && isValid ? '0 4px 14px rgba(15, 118, 110, 0.25)' : 'none'
             }}>
               {loading ? 'Creating account…' : 'Create Account'}
             </button>
